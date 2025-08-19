@@ -45,7 +45,7 @@ Si eres padre/madre con conocimientos básicos de programación, cada aplicació
 ### Instalación
 ```bash
 # 1. Descargar el repositorio completo
-git clone https://github.com/tu-usuario/aplicaciones-educativas.git
+git clone https://github.com/gussttaav/my-kid-ai-learning-apps.git
 cd my-kid-ai-learning-apps
 
 # 2. Ir a la aplicación que quieres usar
