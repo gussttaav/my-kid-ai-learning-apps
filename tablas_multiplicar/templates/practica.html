@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block title %}Práctica - Tabla del {{ tabla }}{% endblock %}
+
+{% block content %}
+<div id="inicio" class="pantalla">
+    <h1>📚 Tabla del {{ tabla }}</h1>
+    <p style="font-size: 1.3em; color: #4a5568; margin: 20px 0;">
+        Vas a practicar con <strong>20 preguntas</strong>
+    </p>
+    <p style="color: #718096; margin-bottom: 30px;">
+        Tienes <strong>10 segundos</strong> para responder cada pregunta
+    </p>
+    <button class="btn btn-success" onclick="empezarPractica()" style="font-size: 1.3em; padding: 20px 40px;">
+        🚀 ¡Comenzar Práctica!
+    </button>
+    <div style="margin-top: 30px;">
+        <a href="/" class="btn btn-secondary">← Volver al inicio</a>
+    </div>
+</div>
+
+<div id="practica" class="pantalla" style="display: none;">
+    <div class="progreso">
+        <div class="progreso-barra" id="progreso-barra"></div>
+    </div>
+    
+    <h2 style="color: #4a5568;">Pregunta <span id="numero-pregunta">1</span> de 20</h2>
+    
+    <div class="pregunta" id="pregunta-texto">Cargando...</div>
+    
+    <div class="timer" id="timer">⏰ 10</div>
+    
+    <div style="margin: 30px 0;">
+        <input type="number" id="respuesta-input" placeholder="?" min="0" max="999" autocomplete="off">
+        <button class="btn" onclick="siguientePregunta()" id="siguiente-btn">
+            Siguiente →
+        </button>
+    </div>
+    
+    <div id="feedback" class="resultado" style="display: none;"></div>
+</div>
+
+<div id="resultados" class="pantalla" style="display: none;">
+    <h1>🎉 ¡Práctica Completada!</h1>
+    <h2 style="color: #4a5568;">Tabla del {{ tabla }}</h2>
+    
+    <div class="stats">
+        <div class="stat resultado correcto">
+            <div class="stat-number" id="correctas-final">0</div>
+            <div class="stat-label">Respuestas Correctas</div>
+        </div>
+        <div class="stat" style="background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);">
+            <div class="stat-number" id="incorrectas-final" style="color: #c53030;">0</div>
+            <div class="stat-label" style="color: #742a2a;">Respuestas Incorrectas</div>
+        </div>
+    </div>
+    
+    <div style="margin: 30px 0;">
+        <div class="stat" style="background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);">
+            <div class="stat-number" id="porcentaje-final" style="color: #234e52;">0%</div>
+            <div class="stat-label" style="color: #234e52;">Porcentaje de Acierto</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <a href="/" class="btn btn-success">🏠 Volver al Inicio</a>
+        <a href="/historial" class="btn btn-secondary">📊 Ver Historial</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let tabla = {{ tabla|tojson }};
+class PracticaTablas {
+    constructor(tabla) {
+        this.tabla = tabla;
+        
+        // Intentar cargar estado previo
+        const estadoGuardado = sessionStorage.getItem(`practicaTablas_${tabla}`);
+        
+        if (estadoGuardado) {
+            const estado = JSON.parse(estadoGuardado);
+            this.preguntaActual = estado.preguntaActual;
+            this.correctas = estado.correctas;
+            this.incorrectas = estado.incorrectas;
+            this.multiplicadorAnterior = estado.multiplicadorAnterior;
+        } else {
+            this.preguntaActual = 0;
+            this.correctas = 0;
+            this.incorrectas = 0;
+            this.multiplicadorAnterior = null;
+        }
+        
+        this.totalPreguntas = 20;
+        this.respuestaCorrecta = null;
+        this.tiempoRestante = 10;
+        this.timer = null;
+        this.preguntaRespondida = false;
+    }
+
+    guardarEstado() {
+        const estado = {
+            preguntaActual: this.preguntaActual,
+            correctas: this.correctas,
+            incorrectas: this.incorrectas,
+            multiplicadorAnterior: this.multiplicadorAnterior
+        };
+        sessionStorage.setItem(`practicaTablas_${this.tabla}`, JSON.stringify(estado));
+        sessionStorage.setItem('practicaTablas_tablaActual', this.tabla);
+    }
+
+    limpiarEstado() {
+        sessionStorage.removeItem(`practicaTablas_${this.tabla}`);
+        sessionStorage.removeItem('practicaTablas_tablaActual');
+    }
+
+    async empezarPractica() {
+        document.getElementById('inicio').style.display = 'none';
+        document.getElementById('practica').style.display = 'block';
+        
+        // Guardar la tabla actual
+        this.guardarEstado();
+        
+        // Si es una recarga, mantener el progreso
+        if (this.preguntaActual > 0) {
+            this.actualizarProgreso();
+            document.getElementById('numero-pregunta').textContent = this.preguntaActual + 1;
+        } else {
+            this.preguntaActual = 0;
+            this.actualizarProgreso();
+            document.getElementById('numero-pregunta').textContent = 1;
+        }
+        
+        this.cargarPregunta();
+    }
+
+    async cargarPregunta() {
+        try {
+            // Limpiar cualquier timer anterior
+            if (this.timer) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+            
+            // Construir URL con parámetro del multiplicador anterior si existe
+            let url = `/api/pregunta/${this.tabla}`;
+            if (this.multiplicadorAnterior !== null) {
+                url += `?anterior=${this.multiplicadorAnterior}`;
+            }
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            document.getElementById('pregunta-texto').textContent = `${data.pregunta} = `;
+            this.respuestaCorrecta = data.respuesta_correcta;
+            this.multiplicadorAnterior = data.multiplicador;
+            this.preguntaRespondida = false;
+            
+            // Limpiar input y dar foco
+            const input = document.getElementById('respuesta-input');
+            input.value = '';
+            input.focus();
+            
+            // Ocultar feedback
+            document.getElementById('feedback').style.display = 'none';
+            
+            // Actualizar barra y número de pregunta
+            this.actualizarProgreso();
+            document.getElementById('numero-pregunta').textContent = this.preguntaActual + 1;
+            
+            // Guardar estado antes de iniciar timer
+            this.guardarEstado();
+            
+            // Iniciar timer
+            this.iniciarTimer();
+            
+        } catch (error) {
+            console.error('Error al cargar pregunta:', error);
+        }
+    }
+
+    iniciarTimer() {
+        // Asegurar que no haya timers previos corriendo
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+        
+        this.tiempoRestante = 10;
+        this.actualizarTimer();
+        
+        this.timer = setInterval(() => {
+            this.tiempoRestante--;
+            this.actualizarTimer();
+            
+            if (this.tiempoRestante <= 0) {
+                clearInterval(this.timer);
+                this.timer = null;
+                this.timeOut();
+            }
+        }, 1000);
+    }
+
+    actualizarTimer() {
+        const timerElement = document.getElementById('timer');
+        timerElement.textContent = `⏰ ${this.tiempoRestante}`;
+        
+        // Cambiar color cuando quedan pocos segundos
+        if (this.tiempoRestante <= 3) {
+            timerElement.style.color = '#e53e3e';
+            timerElement.style.fontSize = '1.8em';
+        } else if (this.tiempoRestante <= 5) {
+            timerElement.style.color = '#dd6b20';
+            timerElement.style.fontSize = '1.6em';
+        } else {
+            timerElement.style.color = '#38a169';
+            timerElement.style.fontSize = '1.5em';
+        }
+    }
+
+    timeOut() {
+        if (!this.preguntaRespondida) {
+            this.preguntaRespondida = true;
+            
+            const respuestaUsuario = document.getElementById('respuesta-input').value.trim();
+            
+            // Si el usuario escribió algo, evaluar la respuesta
+            if (respuestaUsuario !== '') {
+                const respuestaNumero = parseInt(respuestaUsuario);
+                
+                if (!isNaN(respuestaNumero) && respuestaNumero === this.respuestaCorrecta) {
+                    this.correctas++;
+                    this.mostrarFeedback('⏰ ¡Tiempo agotado pero tu respuesta es correcta!', true);
+                } else {
+                    this.incorrectas++;
+                    this.mostrarFeedback(`⏰ Tiempo agotado. Tu respuesta era incorrecta. La respuesta correcta era ${this.respuestaCorrecta}`, false);
+                }
+            } else {
+                // Si no escribió nada
+                this.incorrectas++;
+                this.mostrarFeedback('⏰ ¡Tiempo agotado! No respondiste', false);
+            }
+            
+            // Guardar estado antes de avanzar
+            this.guardarEstado();
+            
+            setTimeout(() => {
+                this.avanzarPregunta();
+            }, 2000);
+        }
+    }
+
+    verificarRespuesta() {
+        if (this.preguntaRespondida) return;
+        
+        // Limpiar timer inmediatamente
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+        
+        this.preguntaRespondida = true;
+        
+        const respuestaInput = document.getElementById('respuesta-input').value.trim();
+        
+        // Verificar si hay una respuesta válida
+        if (respuestaInput === '') {
+            this.incorrectas++;
+            this.mostrarFeedback('❌ No escribiste una respuesta', false);
+        } else {
+            const respuestaUsuario = parseInt(respuestaInput);
+            
+            if (isNaN(respuestaUsuario)) {
+                this.incorrectas++;
+                this.mostrarFeedback('❌ Por favor escribe solo números', false);
+            } else if (respuestaUsuario === this.respuestaCorrecta) {
+                this.correctas++;
+                this.mostrarFeedback('✅ ¡Correcto!', true);
+            } else {
+                this.incorrectas++;
+                this.mostrarFeedback(`❌ Incorrecto. La respuesta era ${this.respuestaCorrecta}`, false);
+            }
+        }
+        
+        // Guardar estado antes de avanzar
+        this.guardarEstado();
+        
+        setTimeout(() => {
+            this.avanzarPregunta();
+        }, 1500);
+    }
+
+    mostrarFeedback(mensaje, esCorrect) {
+        const feedback = document.getElementById('feedback');
+        feedback.textContent = mensaje;
+        feedback.className = `resultado ${esCorrect ? 'correcto' : 'incorrecto'}`;
+        feedback.style.display = 'block';
+    }
+
+    avanzarPregunta() {
+        this.preguntaActual++;
+        
+        if (this.preguntaActual >= this.totalPreguntas) {
+            this.finalizarPractica();
+        } else {
+            this.actualizarProgreso();
+            document.getElementById('numero-pregunta').textContent = this.preguntaActual + 1;
+            this.cargarPregunta();
+        }
+    }
+
+    actualizarProgreso() {
+        const progreso = (this.preguntaActual / this.totalPreguntas) * 100;
+        document.getElementById('progreso-barra').style.width = `${progreso}%`;
+    }
+
+    async finalizarPractica() {
+        // Guardar resultados
+        try {
+            await fetch('/api/resultado', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tabla: this.tabla,
+                    correctas: this.correctas,
+                    incorrectas: this.incorrectas
+                })
+            });
+        } catch (error) {
+            console.error('Error al guardar resultados:', error);
+        }
+
+        // Limpiar estado
+        this.limpiarEstado();
+
+        // Mostrar resultados
+        document.getElementById('practica').style.display = 'none';
+        document.getElementById('resultados').style.display = 'block';
+        
+        document.getElementById('correctas-final').textContent = this.correctas;
+        document.getElementById('incorrectas-final').textContent = this.incorrectas;
+        
+        const porcentaje = Math.round((this.correctas / this.totalPreguntas) * 100);
+        document.getElementById('porcentaje-final').textContent = `${porcentaje}%`;
+    }
+
+    siguientePregunta() {
+        this.verificarRespuesta();
+    }
+}
+
+// Instancia global
+let practica;
+
+function empezarPractica() {
+    practica = new PracticaTablas(tabla);
+    practica.empezarPractica();
+    
+    // Configurar listener para tecla Enter
+    const input = document.getElementById('respuesta-input');
+    input.removeEventListener('keypress', handleEnterKey);
+    input.addEventListener('keypress', handleEnterKey);
+}
+
+function handleEnterKey(e) {
+    if (e.key === 'Enter') {
+        siguientePregunta();
+    }
+}
+
+function siguientePregunta() {
+    if (practica) {
+        practica.siguientePregunta();
+    }
+}
+
+// Verificar si hay una práctica en curso al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    const tablaEnCurso = sessionStorage.getItem('practicaTablas_tablaActual');
+    if (tablaEnCurso && parseInt(tablaEnCurso) === tabla) {
+        // Mostrar mensaje de continuando práctica
+        const mensaje = document.createElement('div');
+        mensaje.textContent = "Continuando práctica anterior...";
+        mensaje.style.position = 'fixed';
+        mensaje.style.top = '20px';
+        mensaje.style.left = '50%';
+        mensaje.style.transform = 'translateX(-50%)';
+        mensaje.style.backgroundColor = '#4299e1';
+        mensaje.style.color = 'white';
+        mensaje.style.padding = '10px 20px';
+        mensaje.style.borderRadius = '5px';
+        mensaje.style.zIndex = '1000';
+        document.body.appendChild(mensaje);
+        
+        setTimeout(() => {
+            document.body.removeChild(mensaje);
+        }, 2000);
+        
+        // Iniciar práctica automáticamente
+        empezarPractica();
+    }
+});
+
+// Limpiar estado si el usuario abandona la página
+window.addEventListener('beforeunload', function() {
+    if (practica && practica.preguntaActual > 0 && practica.preguntaActual < practica.totalPreguntas) {
+        practica.guardarEstado();
+    }
+});
+</script>
+{% endblock %}
