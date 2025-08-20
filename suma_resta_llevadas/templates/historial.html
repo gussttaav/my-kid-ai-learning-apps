@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Resultados{% endblock %}
+
+{% block content %}
+<h1>📊 Historial de Resultados</h1>
+
+<div style="margin: 20px 0;">
+    <a href="/" class="btn btn-secondary">← Volver al Inicio</a>
+</div>
+
+{% if resultados %}
+    <div style="overflow-x: auto; margin-top: 30px;">
+        <table class="historial-table">
+            <thead>
+                <tr>
+                    <th>📅 Fecha y Hora</th>
+                    <th>🧮 Operación</th>
+                    <th>✅ Correctas</th>
+                    <th>❌ Incorrectas</th>
+                    <th>📈 Porcentaje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for resultado in resultados %}
+                <tr>
+                    <td>{{ resultado.fecha_hora }}</td>
+                    <td style="text-align: center; font-weight: bold; color: #4299e1;">
+                        {% if resultado.operacion == 'suma' %}
+                            ➕ Sumas
+                        {% else %}
+                            ➖ Restas
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center; color: #38a169; font-weight: bold;">
+                        {{ resultado.correctas }}
+                    </td>
+                    <td style="text-align: center; color: #e53e3e; font-weight: bold;">
+                        {{ resultado.incorrectas }}
+                    </td>
+                    <td style="text-align: center; font-weight: bold;">
+                        {% set porcentaje = ((resultado.correctas / 20) * 100) | round | int %}
+                        <span style="color: {% if porcentaje >= 80 %}#38a169{% elif porcentaje >= 60 %}#dd6b20{% else %}#e53e3e{% endif %}">
+                            {{ porcentaje }}%
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Estadísticas generales -->
+    <div style="margin-top: 40px; padding: 25px; background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%); border-radius: 15px;">
+        <h3 style="color: #4a5568; margin-bottom: 20px;">📈 Estadísticas Generales</h3>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" style="color: #4299e1;">{{ resultados|length }}</div>
+                <div class="stat-label">Prácticas Realizadas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" style="color: #38a169;">
+                    {% set total_correctas = resultados | sum(attribute='correctas') %}
+                    {{ total_correctas }}
+                </div>
+                <div class="stat-label">Respuestas Correctas</div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" style="color: #e53e3e;">
+                    {% set total_incorrectas = resultados | sum(attribute='incorrectas') %}
+                    {{ total_incorrectas }}
+                </div>
+                <div class="stat-label">Respuestas Incorrectas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" style="color: #805ad5;">
+                    {% set total_preguntas = total_correctas + total_incorrectas %}
+                    {% if total_preguntas > 0 %}
+                        {{ ((total_correctas / total_preguntas) * 100) | round | int }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+                <div class="stat-label">Promedio General</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen por operación -->
+    <div style="margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border-radius: 15px;">
+        <h3 style="color: #4a5568; margin-bottom: 20px;">🎯 Resumen por Operación</h3>
+        
+        {% set operaciones_stats = {} %}
+        {% for resultado in resultados %}
+            {% set operacion = resultado.operacion %}
+            {% if operacion not in operaciones_stats %}
+                {% set _ = operaciones_stats.update({operacion: {'correctas': 0, 'incorrectas': 0, 'practicas': 0}}) %}
+            {% endif %}
+            {% set _ = operaciones_stats[operacion].update({
+                'correctas': operaciones_stats[operacion]['correctas'] + resultado.correctas,
+                'incorrectas': operaciones_stats[operacion]['incorrectas'] + resultado.incorrectas,
+                'practicas': operaciones_stats[operacion]['practicas'] + 1
+            }) %}
+        {% endfor %}
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+            {% for operacion, stats in operaciones_stats.items() %}
+                {% set total_preguntas_operacion = stats.correctas + stats.incorrectas %}
+                {% set porcentaje_operacion = ((stats.correctas / total_preguntas_operacion) * 100) | round | int if total_preguntas_operacion > 0 else 0 %}
+                
+                <div style="background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h4 style="color: #4299e1; margin-bottom: 15px; font-size: 1.3em;">
+                        {% if operacion == 'suma' %}
+                            ➕ Sumas con llevadas
+                        {% else %}
+                            ➖ Restas con préstamos
+                        {% endif %}
+                    </h4>
+                    <div style="font-size: 2em; font-weight: bold; margin: 15px 0; color: {% if porcentaje_operacion >= 80 %}#38a169{% elif porcentaje_operacion >= 60 %}#dd6b20{% else %}#e53e3e{% endif %}">
+                        {{ porcentaje_operacion }}%
+                    </div>
+                    <div style="font-size: 1em; color: #718096; margin-bottom: 10px;">
+                        {{ stats.practicas }} práctica{{ 's' if stats.practicas != 1 else '' }}
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <div style="background: #c6f6d5; padding: 8px; border-radius: 8px;">
+                            <div style="font-weight: bold; color: #276749;">{{ stats.correctas }}</div>
+                            <div style="font-size: 0.8em; color: #276749;">Correctas</div>
+                        </div>
+                        <div style="background: #fed7d7; padding: 8px; border-radius: 8px;">
+                            <div style="font-weight: bold; color: #742a2a;">{{ stats.incorrectas }}</div>
+                            <div style="font-size: 0.8em; color: #742a2a;">Incorrectas</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% else %}
+    <div style="text-align: center; margin: 50px 0; padding: 40px; background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%); border-radius: 15px;">
+        <h2 style="color: #4a5568; margin-bottom: 20px;">📝 No hay resultados aún</h2>
+        <p style="color: #718096; font-size: 1.1em; margin-bottom: 30px;">
+            Realiza tu primera práctica para ver tus resultados aquí
+        </p>
+        <a href="/" class="btn btn-success" style="font-size: 1.2em; padding: 15px 30px;">
+            🚀 ¡Empezar Primera Práctica!
+        </a>
+    </div>
+{% endif %}
+
+<div style="margin-top: 40px; padding: 20px; background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); border-radius: 15px; text-align: center;">
+    <h4 style="color: #234e52; margin-bottom: 15px;">💡 Consejos para Mejorar</h4>
+    <ul style="text-align: left; color: #2c7a7b; line-height: 1.8; max-width: 600px; margin: 0 auto;">
+        <li><strong>Practica regularmente:</strong> La constancia es clave para dominar las llevadas y préstamos</li>
+        <li><strong>Visualiza el proceso:</strong> Imagina las llevadas y préstamos paso a paso</li>
+        <li><strong>Verifica tu trabajo:</strong> Siempre revisa que cada dígito esté en su lugar correcto</li>
+        <li><strong>No te presiones:</strong> Si te equivocas, aprende del error y sigue adelante</li>
+        <li><strong>Alterna operaciones:</strong> Practica tanto sumas como restas para mantener ambas habilidades</li>
+        <li><strong>Celebra tus logros:</strong> Cada mejora cuenta, por pequeña que sea</li>
+    </ul>
+</div>
+
+<div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%); border-radius: 10px; text-align: center;">
+    <p style="color: #744210; margin: 0; font-style: italic;">
+        💭 "Las matemáticas no son un espectáculo, sino un viaje de descubrimiento." - ¡Sigue practicando, Armandito!
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Sumas y Restas - Página Principal{% endblock %}
+
+{% block content %}
+<h1>🧮 Practica las sumas y restas con llevadas</h1>
+<p style="font-size: 1.2em; color: #4a5568; margin-bottom: 30px;">
+    Selecciona el tipo de operación para empezar a practicar
+</p>
+
+<div class="operacion-grid">
+    <a href="/practica/suma" class="btn operacion-btn" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+        ➕ Sumas con llevadas
+        <div class="operacion-ejemplo">
+            Ejemplo: 47 + 36
+        </div>
+    </a>
+    <a href="/practica/resta" class="btn operacion-btn" style="background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);">
+        ➖ Restas con préstamos
+        <div class="operacion-ejemplo">
+            Ejemplo: 62 - 28
+        </div>
+    </a>
+</div>
+
+<div style="margin-top: 40px;">
+    <a href="/historial" class="btn btn-secondary">
+        📊 Ver Historial de Resultados
+    </a>
+</div>
+
+<div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%); border-radius: 15px;">
+    <h3 style="color: #4a5568; margin-bottom: 15px;">ℹ️ Instrucciones</h3>
+    <ul style="text-align: left; color: #4a5568; line-height: 1.6;">
+        <li>Selecciona el tipo de operación (suma o resta)</li>
+        <li>Responde 20 preguntas en total</li>
+        <li>Tienes 25 segundos para cada pregunta</li>
+        <li>Escribe cada dígito en su casilla correspondiente</li>
+        <li>Todas las operaciones incluyen llevadas o préstamos</li>
+        <li>Al final verás tus resultados y se guardarán automáticamente</li>
+    </ul>
+</div>
+
+<div style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); border-radius: 15px;">
+    <h4 style="color: #234e52; margin-bottom: 15px;">💡 Ejemplo de cómo funciona:</h4>
+    <div class="operacion-container" style="background: white; transform: scale(0.8);">
+        <div class="operacion-display">
+            <div></div>
+            <div class="numero">47</div>
+            <div></div>
+            
+            <div class="signo-operacion">+</div>
+            <div class="numero">36</div>
+            <div></div>
+        </div>
+        <div class="linea-division"></div>
+        <div class="inputs-respuesta" style="grid-template-columns: repeat(2, 50px);">
+            <input type="text" class="input-digito" value="8" readonly style="background: #e6fffa;">
+            <input type="text" class="input-digito" value="3" readonly style="background: #e6fffa;">
+        </div>
+    </div>
+    <p style="color: #2c7a7b; font-size: 0.9em;">
+        Completa cada casilla con el dígito correspondiente del resultado
+    </p>
+</div>
+{% endblock %}

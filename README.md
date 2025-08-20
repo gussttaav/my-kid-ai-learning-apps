@@ -8,29 +8,12 @@ Como padre, siempre busco maneras creativas y efectivas de ayudar a mi niño con
 
 Con la ayuda de inteligencia artificial, he desarrollado estas herramientas pensando específicamente en las necesidades de aprendizaje de mi hijo, pero las hago públicas porque sé que otros padres pueden estar en la misma situación.
 
-## 🏠 ¿Por Qué Crear Mis Propias Aplicaciones?
-
-- **📱 Control total**: Puedo adaptar cada detalle a las necesidades específicas de mi niño
-- **🔒 Privacidad**: Los datos de progreso se quedan en casa, sin cookies de terceros ni tracking
-- **💰 Cero costo**: No hay suscripciones, anuncios ni compras dentro de la aplicación
-- **⚡ Disponibilidad**: Funcionan sin internet una vez instaladas localmente
-- **🎨 Personalización**: Puedo ajustar tiempos, dificultad y estilo según lo que funciona mejor
-- **📊 Seguimiento real**: Veo exactamente cómo progresa mi hijo, sin algoritmos ocultos
-
 ## 📚 Aplicaciones Creadas
 
-### 🧮 [Tablas de Multiplicar](./tablas_multiplicar)
-**La primera aplicación que creé** cuando vi que mi niño necesitaba más práctica con las tablas.
+- [Tablas de Multiplicar](./tablas_multiplicar)
 
-**Por qué la hice así:**
-- ⏰ **10 segundos por pregunta**: Después de observar que es el tiempo justo para pensar sin estresarse
-- 📊 **20 preguntas por sesión**: Mi hijo se concentra bien durante este tiempo, ni muy corto ni muy largo
-- 💾 **Guarda el progreso**: Porque a veces necesita un descanso a mitad de práctica
-- 📈 **Estadísticas detalladas**: Para que yo pueda ver en qué tablas necesita más trabajo
-- 🎯 **Feedback inmediato**: Los niños necesitan saber al instante si lo hicieron bien
+- [Suma y Resta con Llevadas](./suma_resta_llevadas/)
 
-### ➕➖ [Suma y Resta con Llevadas](./suma-resta/) *(Próximamente)*
-**La siguiente aventura** porque estas operaciones le están costando trabajo en el cole.
 
 ## 🛠️ Información Técnica
 
@@ -41,31 +24,6 @@ Si eres padre/madre con conocimientos básicos de programación, cada aplicació
 - 📝 Su propio archivo README con instrucciones específicas de instalación
 - 🔧 Todo el código necesario para funcionar
 - 📊 Sus propios archivos de datos
-
-### Instalación
-```bash
-# 1. Descargar el repositorio completo
-git clone https://github.com/gussttaav/my-kid-ai-learning-apps.git
-cd my-kid-ai-learning-apps
-
-# 2. Ir a la aplicación que quieres usar
-cd tablas_multiplicar  # o la carpeta de la aplicación que prefieras
-# Puedes eliminar las carpetas de otras aplicaciones que no vayas a usar
-# son totalmente independientes
-
-# 3. Seguir las instrucciones del README específico de esa aplicación
-```
-
-
-## 🎯 Diseñadas Específicamente para Niños
-
-Cada detalle está pensado desde la perspectiva de un padre que observa cómo aprende su hijo:
-
-- 🌈 **Colores alegres** que mantienen la atención sin ser abrumadores
-- 📱 **Funciona en tablets** porque es como más cómodo practican los niños
-- ⚡ **Respuesta inmediata** porque la paciencia infantil es limitada
-- 🎨 **Visual claro** sin distracciones innecesarias
-- 🔤 **Texto grande** para facilitar la lectura
 
 
 ## 🤝 Compartiendo con Otros Padres
@@ -81,19 +39,12 @@ Porque sé que no soy el único padre que:
 ### ¿Qué Nivel Técnico Necesitas?
 
 Si puedes:
+- ✅ Tener Python instalado
 - ✅ Abrir una terminal/línea de comandos
 - ✅ Ejecutar comandos básicos como `python app.py`
-- ✅ Navegar entre carpetas con `cd`
-- ✅ Instalar programas con `pip install`
+- ✅ Instalar paquetes de Python con `pip install`
 
 **¡Entonces puedes usar estas aplicaciones!**
-
-### No Eres Programador pero Quieres Usarlas?
-
-Si no tienes conocimientos técnicos pero te interesa, puedes:
-- 👨‍💻 Pedirle ayuda a algún amigo o familiar con conocimientos de programación
-- 📚 Seguir un tutorial básico de Python (hay muchos gratuitos)
-- 💬 Abrir un "Issue" en GitHub y te ayudo con la instalación
 
 ## 🔄 Actualizaciones y Mejoras
 
