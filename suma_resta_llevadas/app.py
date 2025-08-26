@@ -138,10 +138,24 @@ def save_resultado():
 @app.route('/historial')
 def historial():
     """Página para ver el historial de resultados"""
-    results = load_results()
+    resultados_all = load_results()
     # Ordenar por fecha más reciente primero
-    results.reverse()
-    return render_template('historial.html', resultados=results)
+    resultados_all.reverse()
+    page = int(request.args.get('page', 1))
+    per_page = 5
+    total = len(resultados_all)
+    start = (page - 1) * per_page
+    end = start + per_page
+    resultados = resultados_all[start:end]
+    total_pages = (total + per_page - 1) // per_page
+
+    return render_template(
+        'historial.html',
+        resultados=resultados,
+        resultados_all=resultados_all,
+        page=page,
+        total_pages=total_pages
+    )
 
 if __name__ == '__main__':
     # Crear directorio templates si no existe

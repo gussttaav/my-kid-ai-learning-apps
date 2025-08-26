@@ -9,7 +9,7 @@
     <a href="/" class="btn btn-secondary">← Volver al Inicio</a>
 </div>
 
-{% if resultados %}
+{% if resultados_all %}
     <div style="overflow-x: auto; margin-top: 30px;">
         <table class="historial-table">
             <thead>
@@ -50,18 +50,51 @@
         </table>
     </div>
 
+    <!-- Controles de paginación mejorados -->
+    <div style="margin: 5px 0; text-align: center;">
+        <div style="margin-bottom: 8px; color: #4a5568; font-size: 1em;">
+            Mostrando 
+            {{ ((page-1)*5 + 1) }}-{{ ((page-1)*5 + resultados|length) }} 
+            de {{ resultados_all|length }} entradas
+        </div>
+        {% if total_pages > 1 %}
+            <nav aria-label="Historial paginación">
+                <ul style="display: flex; flex-wrap: wrap; justify-content: center; list-style: none; padding: 0; gap: 4px; max-width: 100vw;">
+                    {% if page > 1 %}
+                        <li>
+                            <a href="{{ url_for('historial', page=page-1) }}" style="padding: 6px 14px; border-radius: 5px; color: #3182ce; text-decoration: none; border: 1px solid #cbd5e0;">Anterior</a>
+                        </li>
+                    {% endif %}
+                    {% for p in range(1, total_pages+1) %}
+                        <li>
+                            <a href="{{ url_for('historial', page=p) }}"
+                               style="padding: 6px 12px; border-radius: 5px; text-decoration: none; border: 1px solid #cbd5e0; {% if p == page %}background: #3182ce; color: white; font-weight: bold;{% else %}color: #3182ce; background: #f7fafc;{% endif %}">
+                               {{ p }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                    {% if page < total_pages %}
+                        <li>
+                            <a href="{{ url_for('historial', page=page+1) }}" style="padding: 6px 14px; border-radius: 5px; color: #3182ce; text-decoration: none; border: 1px solid #cbd5e0;">Siguiente</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+
     <!-- Estadísticas generales -->
     <div style="margin-top: 40px; padding: 25px; background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%); border-radius: 15px;">
         <h3 style="color: #4a5568; margin-bottom: 20px;">📈 Estadísticas Generales</h3>
         
         <div class="stats">
             <div class="stat">
-                <div class="stat-number" style="color: #4299e1;">{{ resultados|length }}</div>
+                <div class="stat-number" style="color: #4299e1;">{{ resultados_all|length }}</div>
                 <div class="stat-label">Prácticas Realizadas</div>
             </div>
             <div class="stat">
                 <div class="stat-number" style="color: #38a169;">
-                    {% set total_correctas = resultados | sum(attribute='correctas') %}
+                    {% set total_correctas = resultados_all | sum(attribute='correctas') %}
                     {{ total_correctas }}
                 </div>
                 <div class="stat-label">Respuestas Correctas</div>
@@ -71,7 +104,7 @@
         <div class="stats">
             <div class="stat">
                 <div class="stat-number" style="color: #e53e3e;">
-                    {% set total_incorrectas = resultados | sum(attribute='incorrectas') %}
+                    {% set total_incorrectas = resultados_all | sum(attribute='incorrectas') %}
                     {{ total_incorrectas }}
                 </div>
                 <div class="stat-label">Respuestas Incorrectas</div>
@@ -95,7 +128,7 @@
         <h3 style="color: #4a5568; margin-bottom: 20px;">🎯 Resumen por Operación</h3>
         
         {% set operaciones_stats = {} %}
-        {% for resultado in resultados %}
+        {% for resultado in resultados_all %}
             {% set operacion = resultado.operacion %}
             {% if operacion not in operaciones_stats %}
                 {% set _ = operaciones_stats.update({operacion: {'correctas': 0, 'incorrectas': 0, 'practicas': 0}}) %}

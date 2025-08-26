@@ -1,16 +1,33 @@
 {% extends "base.html" %}
 
-{% block title %}Práctica - Tabla del {{ tabla }}{% endblock %}
+{% block title %}
+  {% if tabla == 'mixta' %}
+    Práctica - Tablas Mixtas
+  {% else %}
+    Práctica - Tabla del {{ tabla }}
+  {% endif %}
+{% endblock %}
 
 {% block content %}
 <div id="inicio" class="pantalla">
-    <h1>📚 Tabla del {{ tabla }}</h1>
-    <p style="font-size: 1.3em; color: #4a5568; margin: 20px 0;">
-        Vas a practicar con <strong>20 preguntas</strong>
-    </p>
-    <p style="color: #718096; margin-bottom: 30px;">
-        Tienes <strong>10 segundos</strong> para responder cada pregunta
-    </p>
+    {% if tabla == 'mixta' %}
+        <h1>🌟 Práctica Mixta</h1>
+        <p style="font-size: 1.3em; color: #4a5568; margin: 20px 0;">
+            Vas a practicar con <strong>20 preguntas</strong> de las tablas <strong>2 al 9</strong>
+        </p>
+        <p style="color: #718096; margin-bottom: 30px;">
+            Solo multiplicaciones del <strong>2×2 al 9×9</strong> • Tienes <strong>10 segundos</strong> por pregunta
+        </p>
+    {% else %}
+        <h1>📚 Tabla del {{ tabla }}</h1>
+        <p style="font-size: 1.3em; color: #4a5568; margin: 20px 0;">
+            Vas a practicar con <strong>20 preguntas</strong>
+        </p>
+        <p style="color: #718096; margin-bottom: 30px;">
+            Tienes <strong>10 segundos</strong> para responder cada pregunta
+        </p>
+    {% endif %}
+    
     <button class="btn btn-success" onclick="empezarPractica()" style="font-size: 1.3em; padding: 20px 40px;">
         🚀 ¡Comenzar Práctica!
     </button>
@@ -26,6 +43,12 @@
     
     <h2 style="color: #4a5568;">Pregunta <span id="numero-pregunta">1</span> de 20</h2>
     
+    {% if tabla == 'mixta' %}
+        <p style="color: #718096; margin-bottom: 10px;">Práctica Mixta (Tablas 2-9)</p>
+    {% else %}
+        <p style="color: #718096; margin-bottom: 10px;">Tabla del {{ tabla }}</p>
+    {% endif %}
+    
     <div class="pregunta" id="pregunta-texto">Cargando...</div>
     
     <div class="timer" id="timer">⏰ 10</div>
@@ -35,6 +58,9 @@
         <button class="btn" onclick="siguientePregunta()" id="siguiente-btn">
             Siguiente →
         </button>
+        <button class="btn btn-danger" onclick="reiniciarPractica()" id="reiniciar-btn" style="margin-left: 10px;">
+            Reiniciar Práctica
+        </button>
     </div>
     
     <div id="feedback" class="resultado" style="display: none;"></div>
@@ -42,7 +68,11 @@
 
 <div id="resultados" class="pantalla" style="display: none;">
     <h1>🎉 ¡Práctica Completada!</h1>
-    <h2 style="color: #4a5568;">Tabla del {{ tabla }}</h2>
+    {% if tabla == 'mixta' %}
+        <h2 style="color: #4a5568;">Práctica Mixta (Tablas 2-9)</h2>
+    {% else %}
+        <h2 style="color: #4a5568;">Tabla del {{ tabla }}</h2>
+    {% endif %}
     
     <div class="stats">
         <div class="stat resultado correcto">
@@ -72,6 +102,7 @@
 {% block scripts %}
 <script>
 let tabla = {{ tabla|tojson }};
+
 class PracticaTablas {
     constructor(tabla) {
         this.tabla = tabla;
@@ -133,6 +164,50 @@ class PracticaTablas {
         }
         
         this.cargarPregunta();
+    }
+
+    reiniciarPractica() {
+        // Detener timer si está corriendo
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+        
+        // Limpiar estado sin guardar resultados
+        this.limpiarEstado();
+        
+        // Resetear variables
+        this.preguntaActual = 0;
+        this.correctas = 0;
+        this.incorrectas = 0;
+        this.preguntaRespondida = false;
+        this.multiplicadorAnterior = null;
+        
+        // Volver a la pantalla inicial
+        document.getElementById('practica').style.display = 'none';
+        document.getElementById('resultados').style.display = 'none';
+        document.getElementById('inicio').style.display = 'block';
+        
+        // Mostrar mensaje de confirmación
+        const mensaje = document.createElement('div');
+        mensaje.textContent = "Práctica reiniciada";
+        mensaje.style.position = 'fixed';
+        mensaje.style.top = '20px';
+        mensaje.style.left = '50%';
+        mensaje.style.transform = 'translateX(-50%)';
+        mensaje.style.backgroundColor = '#f56565';
+        mensaje.style.color = 'white';
+        mensaje.style.padding = '10px 20px';
+        mensaje.style.borderRadius = '5px';
+        mensaje.style.zIndex = '1000';
+        mensaje.style.boxShadow = '0 4px 15px rgba(245, 101, 101, 0.3)';
+        document.body.appendChild(mensaje);
+        
+        setTimeout(() => {
+            if (document.body.contains(mensaje)) {
+                document.body.removeChild(mensaje);
+            }
+        }, 2000);
     }
 
     async cargarPregunta() {
@@ -376,10 +451,19 @@ function siguientePregunta() {
     }
 }
 
+function reiniciarPractica() {
+    if (practica) {
+        // Confirmar antes de reiniciar
+        if (confirm('¿Estás seguro de que quieres reiniciar la práctica? Se perderá el progreso actual.')) {
+            practica.reiniciarPractica();
+        }
+    }
+}
+
 // Verificar si hay una práctica en curso al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
     const tablaEnCurso = sessionStorage.getItem('practicaTablas_tablaActual');
-    if (tablaEnCurso && parseInt(tablaEnCurso) === tabla) {
+    if (tablaEnCurso && tablaEnCurso === tabla.toString()) {
         // Mostrar mensaje de continuando práctica
         const mensaje = document.createElement('div');
         mensaje.textContent = "Continuando práctica anterior...";
