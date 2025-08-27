@@ -1,0 +1,80 @@
+{% extends "base_reloj.html" %}
+
+{% block title %}Práctica de Lectura de Reloj{% endblock %}
+
+{% block content %}
+<h1>🕐 Aprende a leer la hora</h1>
+<p style="font-size: 1.2em; color: #4a5568; margin-bottom: 30px;">
+    Practica leyendo la hora en relojes analógicos
+</p>
+
+<div style="margin: 40px 0;">
+    <a href="/practica" class="btn operacion-btn" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); padding: 40px 60px; font-size: 1.5em;">
+        🕐 Comenzar Práctica
+        <div style="font-size: 0.7em; margin-top: 10px; opacity: 0.8;">
+            20 relojes para practicar
+        </div>
+    </a>
+</div>
+
+<div style="margin-top: 40px;">
+    <a href="/historial" class="btn btn-secondary">
+        📊 Ver Historial de Resultados
+    </a>
+</div>
+
+<div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%); border-radius: 15px;">
+    <h3 style="color: #4a5568; margin-bottom: 15px;">ℹ️ Instrucciones</h3>
+    <ul style="text-align: left; color: #4a5568; line-height: 1.6;">
+        <li>Observa cuidadosamente las manecillas del reloj</li>
+        <li>Escribe la hora en el campo de texto</li>
+        <li>Selecciona la opción correcta (en punto, y cuarto, y media, menos cuarto)</li>
+        <li>Responde 20 preguntas en total</li>
+        <li>Tienes 30 segundos para cada pregunta</li>
+        <li>Al final verás tus resultados y se guardarán automáticamente</li>
+    </ul>
+</div>
+
+<div style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); border-radius: 15px;">
+    <h4 style="color: #234e52; margin-bottom: 15px;">💡 Consejos para leer la hora:</h4>
+    <ul style="text-align: left; color: #2c7a7b; line-height: 1.8;">
+        <li><strong>Manecilla corta (horario):</strong> Indica la hora</li>
+        <li><strong>Manecilla larga (minutero):</strong> Indica los minutos</li>
+        <li><strong>En punto:</strong> El minutero señala al 12</li>
+        <li><strong>Y cuarto:</strong> El minutero señala al 3</li>
+        <li><strong>Y media:</strong> El minutero señala al 6</li>
+        <li><strong>Menos cuarto:</strong> El minutero señala al 9 (usa la siguiente hora)</li>
+    </ul>
+</div>
+
+<div style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border-radius: 15px;">
+    <h4 style="color: #742a2a; margin-bottom: 15px;">🕐 Ejemplo:</h4>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <div class="reloj" style="width: 150px; height: 150px; transform: scale(0.8);">
+            <!-- Números del reloj -->
+            <div class="numero" style="top: 5px; left: 50%; transform: translateX(-50%);">12</div>
+            <div class="numero" style="top: 50%; right: 5px; transform: translateY(-50%);">3</div>
+            <div class="numero" style="bottom: 5px; left: 50%; transform: translateX(-50%);">6</div>
+            <div class="numero" style="top: 50%; left: 5px; transform: translateY(-50%);">9</div>
+            
+            <!-- Marcas de horas -->
+            <div class="marca marca-hora" style="transform: rotate(0deg); top: -4px;"></div>
+            <div class="marca marca-hora" style="transform: rotate(90deg) translateY(-57px); top: 50px; right: 40px;"></div>
+            <div class="marca marca-hora" style="transform: rotate(180deg); top: 110px; right: 10px;"></div>
+            <div class="marca marca-hora" style="transform: rotate(270deg) translateY(-55px); top: 50px; right: 40px;"></div>
+
+            <!-- Manecillas mostrando 3:15 -->
+            <div class="manecilla horario" style="transform: rotate(100deg); width: 4px; height: 40px; margin-left: -2px;"></div>
+            <div class="manecilla minutero" style="transform: rotate(90deg); width: 3px; height: 55px; margin-left: -1.5px;"></div>
+            <div class="centro"></div>
+        </div>
+        <div style="text-align: left;">
+            <div style="font-size: 1.2em; margin-bottom: 10px;"><strong>Se lee:</strong></div>
+            <div style="font-size: 1.1em; color: #e53e3e;">Las <strong>3</strong> y cuarto</div>
+            <div style="font-size: 0.9em; color: #718096; margin-top: 5px;">
+                (Horario en 3, minutero en 3)
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,496 @@
+{% extends "base_reloj.html" %}
+
+{% block title %}Práctica - Lectura de Reloj{% endblock %}
+
+{% block content %}
+<div id="inicio" class="pantalla">
+    <h1>🕐 Práctica de Lectura de Reloj</h1>
+    <p style="font-size: 1.3em; color: #4a5568; margin: 20px 0;">
+        Vas a practicar con <strong>20 relojes</strong>
+    </p>
+    <p style="color: #718096; margin-bottom: 30px;">
+        Tienes <strong>30 segundos</strong> para leer cada reloj
+    </p>
+    <button class="btn btn-success" onclick="empezarPractica()" style="font-size: 1.3em; padding: 20px 40px;">
+        🚀 ¡Comenzar Práctica!
+    </button>
+    <div style="margin-top: 30px;">
+        <a href="/" class="btn btn-secondary">← Volver al inicio</a>
+    </div>
+</div>
+
+<div id="practica" class="pantalla" style="display: none;">
+    <div class="progreso">
+        <div class="progreso-barra" id="progreso-barra"></div>
+    </div>
+    
+    <h2 style="color: #4a5568;">Pregunta <span id="numero-pregunta">1</span> de 20</h2>
+    
+    <div class="reloj-container">
+        <div class="reloj" id="reloj">
+            <!-- Números del reloj -->
+            {% for i in range(1,13) %}
+            <div class="numero" style="position: absolute;
+                    top: 45%;
+                    left: 45%; 
+                    transform: rotate({{i*30}}deg) translateY(-120px) rotate(-{{i*30}}deg);">
+                {{ i }}
+            </div>
+            {% endfor %}
+            
+            <!-- Marcas de las horas -->
+            {% for i in range(12) %}
+            <div class="marca marca-hora" style="position: absolute;
+                    top: 44.5%;
+                    left: 50%; 
+                    transform: rotate({{i*30}}deg) translateY(-135px);"></div>
+            {% endfor %}
+            
+            <!-- Manecillas -->
+            <div class="manecilla horario" id="horario"></div>
+            <div class="manecilla minutero" id="minutero"></div>
+            <div class="centro"></div>
+        </div>
+    </div>
+    
+    <div class="respuesta-container">
+        <div class="tiempo-input">
+            <span class="tiempo-text">Las</span>
+            <input type="number" class="hora-input" id="hora-input" placeholder="?" min="1" max="12">
+            <span class="tiempo-text" id="conectiva">...</span>
+        </div>
+        
+        <div class="opciones-tiempo">
+            <button class="opcion-btn" onclick="seleccionarOpcion('en punto', this)">en punto</button>
+            <button class="opcion-btn" onclick="seleccionarOpcion('y cuarto', this)">y cuarto</button>
+            <button class="opcion-btn" onclick="seleccionarOpcion('y media', this)">y media</button>
+            <button class="opcion-btn" onclick="seleccionarOpcion('menos cuarto', this)">menos cuarto</button>
+        </div>
+    </div>
+    
+    <div class="timer" id="timer">⏰ 30</div>
+    
+    <div style="margin: 30px 0;">
+        <button class="btn" onclick="verificarRespuesta()" id="verificar-btn">
+            Verificar Respuesta
+        </button>
+        <button class="btn btn-danger" onclick="reiniciarPractica()" id="reiniciar-btn" style="margin-left: 10px;">
+            Reiniciar Práctica
+        </button>
+    </div>
+    
+    <div id="feedback" class="resultado" style="display: none;"></div>
+</div>
+
+<div id="resultados" class="pantalla" style="display: none;">
+    <h1>🎉 ¡Práctica Completada!</h1>
+    <h2 style="color: #4a5568;">Lectura de Reloj Analógico</h2>
+    
+    <div class="stats">
+        <div class="stat resultado correcto">
+            <div class="stat-number" id="correctas-final">0</div>
+            <div class="stat-label">Respuestas Correctas</div>
+        </div>
+        <div class="stat" style="background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);">
+            <div class="stat-number" id="incorrectas-final" style="color: #c53030;">0</div>
+            <div class="stat-label" style="color: #742a2a;">Respuestas Incorrectas</div>
+        </div>
+    </div>
+    
+    <div style="margin: 30px 0;">
+        <div class="stat" style="background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);">
+            <div class="stat-number" id="porcentaje-final" style="color: #234e52;">0%</div>
+            <div class="stat-label" style="color: #234e52;">Porcentaje de Acierto</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <a href="/" class="btn btn-success">🏠 Volver al Inicio</a>
+        <a href="/historial" class="btn btn-secondary">📊 Ver Historial</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ⏰ CONFIGURACIÓN DE TIEMPO
+const TIEMPO_POR_PREGUNTA = 30; // segundos
+
+class PracticaReloj {
+    constructor() {
+        // Intentar cargar estado previo
+        const estadoGuardado = sessionStorage.getItem('practicaReloj');
+        
+        if (estadoGuardado) {
+            const estado = JSON.parse(estadoGuardado);
+            this.preguntaActual = estado.preguntaActual;
+            this.correctas = estado.correctas;
+            this.incorrectas = estado.incorrectas;
+        } else {
+            this.preguntaActual = 0;
+            this.correctas = 0;
+            this.incorrectas = 0;
+        }
+        
+        this.totalPreguntas = 20;
+        this.horaCorrecta = null;
+        this.tipoRespuestaCorrecta = null;
+        this.tiempoRestante = TIEMPO_POR_PREGUNTA;
+        this.timer = null;
+        this.preguntaRespondida = false;
+        this.opcionSeleccionada = null;
+    }
+
+    guardarEstado() {
+        const estado = {
+            preguntaActual: this.preguntaActual,
+            correctas: this.correctas,
+            incorrectas: this.incorrectas
+        };
+        sessionStorage.setItem('practicaReloj', JSON.stringify(estado));
+        sessionStorage.setItem('practicaReloj_activa', 'true');
+    }
+
+    limpiarEstado() {
+        sessionStorage.removeItem('practicaReloj');
+        sessionStorage.removeItem('practicaReloj_activa');
+    }
+
+    reiniciarPractica() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+        
+        this.limpiarEstado();
+        
+        this.preguntaActual = 0;
+        this.correctas = 0;
+        this.incorrectas = 0;
+        this.preguntaRespondida = false;
+        
+        document.getElementById('practica').style.display = 'none';
+        document.getElementById('resultados').style.display = 'none';
+        document.getElementById('inicio').style.display = 'block';
+        
+        const mensaje = document.createElement('div');
+        mensaje.textContent = "Práctica reiniciada";
+        mensaje.style.position = 'fixed';
+        mensaje.style.top = '20px';
+        mensaje.style.left = '50%';
+        mensaje.style.transform = 'translateX(-50%)';
+        mensaje.style.backgroundColor = '#f56565';
+        mensaje.style.color = 'white';
+        mensaje.style.padding = '10px 20px';
+        mensaje.style.borderRadius = '5px';
+        mensaje.style.zIndex = '1000';
+        mensaje.style.boxShadow = '0 4px 15px rgba(245, 101, 101, 0.3)';
+        document.body.appendChild(mensaje);
+        
+        setTimeout(() => {
+            if (document.body.contains(mensaje)) {
+                document.body.removeChild(mensaje);
+            }
+        }, 2000);
+    }
+
+    async empezarPractica() {
+        document.getElementById('inicio').style.display = 'none';
+        document.getElementById('practica').style.display = 'block';
+        
+        this.guardarEstado();
+        
+        if (this.preguntaActual > 0) {
+            this.actualizarProgreso();
+            document.getElementById('numero-pregunta').textContent = this.preguntaActual + 1;
+        } else {
+            this.preguntaActual = 0;
+            this.actualizarProgreso();
+            document.getElementById('numero-pregunta').textContent = 1;
+        }
+        
+        this.cargarPregunta();
+    }
+
+    async cargarPregunta() {
+        try {
+            if (this.timer) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+            
+            const response = await fetch('/api/hora');
+            const data = await response.json();
+            
+            this.horaCorrecta = data.hora_display;
+            this.tipoRespuestaCorrecta = data.tipo_respuesta;
+            this.preguntaRespondida = false;
+            this.opcionSeleccionada = null;
+            
+            this.mostrarReloj(data);
+            this.limpiarRespuesta();
+            
+            document.getElementById('feedback').style.display = 'none';
+            
+            this.actualizarProgreso();
+            document.getElementById('numero-pregunta').textContent = this.preguntaActual + 1;
+            
+            this.guardarEstado();
+            this.iniciarTimer();
+            
+        } catch (error) {
+            console.error('Error al cargar pregunta:', error);
+        }
+    }
+
+    mostrarReloj(data) {
+        const horario = document.getElementById('horario');
+        const minutero = document.getElementById('minutero');
+        
+        horario.style.transform = `rotate(${data.angulo_horario}deg)`;
+        minutero.style.transform = `rotate(${data.angulo_minutero}deg)`;
+    }
+
+    limpiarRespuesta() {
+        document.getElementById('hora-input').value = '';
+        document.getElementById('conectiva').textContent = '...';
+        
+        const opciones = document.querySelectorAll('.opcion-btn');
+        opciones.forEach(btn => {
+            btn.classList.remove('seleccionado');
+        });
+        
+        document.getElementById('hora-input').focus();
+    }
+
+    iniciarTimer() {
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+        
+        this.tiempoRestante = TIEMPO_POR_PREGUNTA;
+        this.actualizarTimer();
+        
+        this.timer = setInterval(() => {
+            this.tiempoRestante--;
+            this.actualizarTimer();
+            
+            if (this.tiempoRestante <= 0) {
+                clearInterval(this.timer);
+                this.timer = null;
+                this.timeOut();
+            }
+        }, 1000);
+    }
+
+    actualizarTimer() {
+        const timerElement = document.getElementById('timer');
+        timerElement.textContent = `⏰ ${this.tiempoRestante}`;
+        
+        if (this.tiempoRestante <= 3) {
+            timerElement.style.color = '#e53e3e';
+            timerElement.style.fontSize = '1.8em';
+        } else if (this.tiempoRestante <= 5) {
+            timerElement.style.color = '#dd6b20';
+            timerElement.style.fontSize = '1.6em';
+        } else {
+            timerElement.style.color = '#38a169';
+            timerElement.style.fontSize = '1.5em';
+        }
+    }
+
+    timeOut() {
+        if (!this.preguntaRespondida) {
+            this.preguntaRespondida = true;
+            
+            const horaUsuario = parseInt(document.getElementById('hora-input').value);
+            const respuestaCompleta = this.validarRespuesta(horaUsuario, this.opcionSeleccionada);
+            
+            if (respuestaCompleta.esCompleta && respuestaCompleta.esCorrecto) {
+                this.correctas++;
+                this.mostrarFeedback('⏰ ¡Tiempo agotado pero tu respuesta es correcta!', true);
+            } else {
+                this.incorrectas++;
+                this.mostrarFeedback(`⏰ Tiempo agotado. La respuesta correcta era: Las ${this.horaCorrecta} ${this.tipoRespuestaCorrecta}`, false);
+            }
+            
+            this.guardarEstado();
+            
+            setTimeout(() => {
+                this.avanzarPregunta();
+            }, 3000);
+        }
+    }
+
+    seleccionarOpcion(tipo, elemento) {
+        document.querySelectorAll('.opcion-btn').forEach(btn => {
+            btn.classList.remove('seleccionado');
+        });
+        
+        elemento.classList.add('seleccionado');
+        this.opcionSeleccionada = tipo;
+        
+        document.getElementById('conectiva').textContent = tipo;
+    }
+
+    validarRespuesta(horaUsuario, tipoUsuario) {
+        const esCompleta = horaUsuario >= 1 && horaUsuario <= 12 && tipoUsuario !== null;
+        const esCorrecto = esCompleta && horaUsuario === this.horaCorrecta && tipoUsuario === this.tipoRespuestaCorrecta;
+        
+        return { esCompleta, esCorrecto };
+    }
+
+    verificarRespuesta() {
+        if (this.preguntaRespondida) return;
+        
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+        
+        this.preguntaRespondida = true;
+        
+        const horaUsuario = parseInt(document.getElementById('hora-input').value);
+        const respuestaCompleta = this.validarRespuesta(horaUsuario, this.opcionSeleccionada);
+        
+        if (!respuestaCompleta.esCompleta) {
+            this.incorrectas++;
+            this.mostrarFeedback('❌ Por favor completa la hora y selecciona una opción', false);
+        } else if (respuestaCompleta.esCorrecto) {
+            this.correctas++;
+            this.mostrarFeedback('✅ ¡Correcto!', true);
+        } else {
+            this.incorrectas++;
+            this.mostrarFeedback(`❌ Incorrecto. La respuesta era: Las ${this.horaCorrecta} ${this.tipoRespuestaCorrecta}`, false);
+        }
+        
+        this.guardarEstado();
+        
+        setTimeout(() => {
+            this.avanzarPregunta();
+        }, 2500);
+    }
+
+    mostrarFeedback(mensaje, esCorrecto) {
+        const feedback = document.getElementById('feedback');
+        feedback.textContent = mensaje;
+        feedback.className = `resultado ${esCorrecto ? 'correcto' : 'incorrecto'}`;
+        feedback.style.display = 'block';
+    }
+
+    avanzarPregunta() {
+        this.preguntaActual++;
+        
+        if (this.preguntaActual >= this.totalPreguntas) {
+            this.finalizarPractica();
+        } else {
+            this.actualizarProgreso();
+            document.getElementById('numero-pregunta').textContent = this.preguntaActual + 1;
+            this.cargarPregunta();
+        }
+    }
+
+    actualizarProgreso() {
+        const progreso = (this.preguntaActual / this.totalPreguntas) * 100;
+        document.getElementById('progreso-barra').style.width = `${progreso}%`;
+    }
+
+    async finalizarPractica() {
+        try {
+            await fetch('/api/resultado', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    correctas: this.correctas,
+                    incorrectas: this.incorrectas
+                })
+            });
+        } catch (error) {
+            console.error('Error al guardar resultados:', error);
+        }
+
+        this.limpiarEstado();
+
+        document.getElementById('practica').style.display = 'none';
+        document.getElementById('resultados').style.display = 'block';
+        
+        document.getElementById('correctas-final').textContent = this.correctas;
+        document.getElementById('incorrectas-final').textContent = this.incorrectas;
+        
+        const porcentaje = Math.round((this.correctas / this.totalPreguntas) * 100);
+        document.getElementById('porcentaje-final').textContent = `${porcentaje}%`;
+    }
+}
+
+// Instancia global
+let practica;
+
+function empezarPractica() {
+    practica = new PracticaReloj();
+    practica.empezarPractica();
+}
+
+function verificarRespuesta() {
+    if (practica) {
+        practica.verificarRespuesta();
+    }
+}
+
+function reiniciarPractica() {
+    if (practica) {
+        if (confirm('¿Estás seguro de que quieres reiniciar la práctica? Se perderá el progreso actual.')) {
+            practica.reiniciarPractica();
+        }
+    }
+}
+
+function seleccionarOpcion(tipo, elemento) {
+    if (practica) {
+        practica.seleccionarOpcion(tipo, elemento);
+    }
+}
+
+// Manejar Enter en el input de hora
+document.addEventListener('DOMContentLoaded', function() {
+    const horaInput = document.getElementById('hora-input');
+    if (horaInput) {
+        horaInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                verificarRespuesta();
+            }
+        });
+    }
+    
+    // Verificar si hay una práctica en curso
+    const practicaEnCurso = sessionStorage.getItem('practicaReloj_activa');
+    if (practicaEnCurso) {
+        const mensaje = document.createElement('div');
+        mensaje.textContent = "Continuando práctica anterior...";
+        mensaje.style.position = 'fixed';
+        mensaje.style.top = '20px';
+        mensaje.style.left = '50%';
+        mensaje.style.transform = 'translateX(-50%)';
+        mensaje.style.backgroundColor = '#4299e1';
+        mensaje.style.color = 'white';
+        mensaje.style.padding = '10px 20px';
+        mensaje.style.borderRadius = '5px';
+        mensaje.style.zIndex = '1000';
+        document.body.appendChild(mensaje);
+        
+        setTimeout(() => {
+            document.body.removeChild(mensaje);
+        }, 2000);
+        
+        empezarPractica();
+    }
+});
+
+window.addEventListener('beforeunload', function() {
+    if (practica && practica.preguntaActual > 0 && practica.preguntaActual < practica.totalPreguntas) {
+        practica.guardarEstado();
+    }
+});
+</script>
+{% endblock %}

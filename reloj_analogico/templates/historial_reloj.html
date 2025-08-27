@@ -1,0 +1,196 @@
+{% extends "base_reloj.html" %}
+
+{% block title %}Historial de Resultados - Lectura de Reloj{% endblock %}
+
+{% block content %}
+<h1>📊 Historial de Resultados</h1>
+
+<div style="margin: 20px 0;">
+    <a href="/" class="btn btn-secondary">← Volver al Inicio</a>
+</div>
+
+{% if resultados_all %}
+    <div style="overflow-x: auto; margin-top: 30px;">
+        <table class="historial-table">
+            <thead>
+                <tr>
+                    <th>📅 Fecha y Hora</th>
+                    <th>✅ Correctas</th>
+                    <th>❌ Incorrectas</th>
+                    <th>📈 Porcentaje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for resultado in resultados %}
+                <tr>
+                    <td>{{ resultado.fecha_hora }}</td>
+                    <td style="text-align: center; color: #38a169; font-weight: bold;">
+                        {{ resultado.correctas }}
+                    </td>
+                    <td style="text-align: center; color: #e53e3e; font-weight: bold;">
+                        {{ resultado.incorrectas }}
+                    </td>
+                    <td style="text-align: center; font-weight: bold;">
+                        {% set porcentaje = ((resultado.correctas / 20) * 100) | round | int %}
+                        <span style="color: {% if porcentaje >= 80 %}#38a169{% elif porcentaje >= 60 %}#dd6b20{% else %}#e53e3e{% endif %}">
+                            {{ porcentaje }}%
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Controles de paginación -->
+    <div style="margin: 5px 0; text-align: center;">
+        <div style="margin-bottom: 8px; color: #4a5568; font-size: 1em;">
+            Mostrando 
+            {{ ((page-1)*5 + 1) }}-{{ ((page-1)*5 + resultados|length) }} 
+            de {{ resultados_all|length }} entradas
+        </div>
+        {% if total_pages > 1 %}
+            <nav aria-label="Historial paginación">
+                <ul style="display: flex; flex-wrap: wrap; justify-content: center; list-style: none; padding: 0; gap: 4px; max-width: 100vw;">
+                    {% if page > 1 %}
+                        <li>
+                            <a href="{{ url_for('historial', page=page-1) }}" style="padding: 6px 14px; border-radius: 5px; color: #3182ce; text-decoration: none; border: 1px solid #cbd5e0;">Anterior</a>
+                        </li>
+                    {% endif %}
+                    {% for p in range(1, total_pages+1) %}
+                        <li>
+                            <a href="{{ url_for('historial', page=p) }}"
+                               style="padding: 6px 12px; border-radius: 5px; text-decoration: none; border: 1px solid #cbd5e0; {% if p == page %}background: #3182ce; color: white; font-weight: bold;{% else %}color: #3182ce; background: #f7fafc;{% endif %}">
+                               {{ p }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                    {% if page < total_pages %}
+                        <li>
+                            <a href="{{ url_for('historial', page=page+1) }}" style="padding: 6px 14px; border-radius: 5px; color: #3182ce; text-decoration: none; border: 1px solid #cbd5e0;">Siguiente</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+
+    <!-- Estadísticas generales -->
+    <div style="margin-top: 40px; padding: 25px; background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%); border-radius: 15px;">
+        <h3 style="color: #4a5568; margin-bottom: 20px;">📈 Estadísticas Generales</h3>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" style="color: #4299e1;">{{ resultados_all|length }}</div>
+                <div class="stat-label">Prácticas Realizadas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" style="color: #38a169;">
+                    {% set total_correctas = resultados_all | sum(attribute='correctas') %}
+                    {{ total_correctas }}
+                </div>
+                <div class="stat-label">Respuestas Correctas</div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" style="color: #e53e3e;">
+                    {% set total_incorrectas = resultados_all | sum(attribute='incorrectas') %}
+                    {{ total_incorrectas }}
+                </div>
+                <div class="stat-label">Respuestas Incorrectas</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" style="color: #805ad5;">
+                    {% set total_preguntas = total_correctas + total_incorrectas %}
+                    {% if total_preguntas > 0 %}
+                        {{ ((total_correctas / total_preguntas) * 100) | round | int }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+                <div class="stat-label">Promedio General</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progreso y consejos -->
+    <div style="margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); border-radius: 15px;">
+        <h3 style="color: #234e52; margin-bottom: 20px;">🎯 Tu Progreso</h3>
+        
+        {% set ultimo_resultado = resultados_all[0] if resultados_all else None %}
+        {% if ultimo_resultado %}
+            {% set ultimo_porcentaje = ((ultimo_resultado.correctas / 20) * 100) | round | int %}
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: #2c7a7b; margin-bottom: 10px;">Última práctica:</h4>
+                <div style="background: white; padding: 15px; border-radius: 10px; display: inline-block;">
+                    <span style="font-size: 1.5em; font-weight: bold; color: {% if ultimo_porcentaje >= 80 %}#38a169{% elif ultimo_porcentaje >= 60 %}#dd6b20{% else %}#e53e3e{% endif %}">
+                        {{ ultimo_porcentaje }}%
+                    </span>
+                    <span style="color: #4a5568; margin-left: 10px;">
+                        ({{ ultimo_resultado.correctas }}/20 correctas)
+                    </span>
+                </div>
+            </div>
+        {% endif %}
+        
+        {% if resultados_all|length >= 3 %}
+            {% set primeros_3 = resultados_all[-3:] %}
+            {% set promedio_inicial = ((primeros_3 | sum(attribute='correctas')) / (primeros_3|length * 20) * 100) | round | int %}
+            {% set ultimos_3 = resultados_all[:3] %}
+            {% set promedio_reciente = ((ultimos_3 | sum(attribute='correctas')) / (ultimos_3|length * 20) * 100) | round | int %}
+            {% set mejora = promedio_reciente - promedio_inicial %}
+            
+            <div style="background: white; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                <h4 style="color: #2c7a7b; margin-bottom: 10px;">Evolución:</h4>
+                {% if mejora > 0 %}
+                    <span style="color: #38a169; font-weight: bold;">📈 +{{ mejora }}% de mejora</span>
+                    <p style="color: #2c7a7b; margin-top: 5px; font-size: 0.9em;">
+                        ¡Excelente progreso! Sigues mejorando en la lectura del reloj.
+                    </p>
+                {% elif mejora == 0 %}
+                    <span style="color: #4299e1; font-weight: bold;">➡️ Rendimiento constante</span>
+                    <p style="color: #2c7a7b; margin-top: 5px; font-size: 0.9em;">
+                        Mantienes un buen nivel. Sigue practicando para mejorar.
+                    </p>
+                {% else %}
+                    <span style="color: #dd6b20; font-weight: bold;">📉 {{ mejora }}% de variación</span>
+                    <p style="color: #2c7a7b; margin-top: 5px; font-size: 0.9em;">
+                        No te preocupes, los altibajos son normales. ¡Sigue practicando!
+                    </p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+{% else %}
+    <div style="text-align: center; margin: 50px 0; padding: 40px; background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%); border-radius: 15px;">
+        <h2 style="color: #4a5568; margin-bottom: 20px;">🔍 No hay resultados aún</h2>
+        <p style="color: #718096; font-size: 1.1em; margin-bottom: 30px;">
+            Realiza tu primera práctica de lectura de reloj para ver tus resultados aquí
+        </p>
+        <a href="/practica" class="btn btn-success" style="font-size: 1.2em; padding: 15px 30px;">
+            🚀 ¡Empezar Primera Práctica!
+        </a>
+    </div>
+{% endif %}
+
+<div style="margin-top: 40px; padding: 20px; background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); border-radius: 15px; text-align: center;">
+    <h4 style="color: #234e52; margin-bottom: 15px;">💡 Consejos para Mejorar</h4>
+    <ul style="text-align: left; color: #2c7a7b; line-height: 1.8; max-width: 600px; margin: 0 auto;">
+        <li><strong>Practica regularmente:</strong> Unos minutos cada día te ayudarán a mejorar</li>
+        <li><strong>Observa las manecillas:</strong> Primero mira la manecilla corta (horas), luego la larga (minutos)</li>
+        <li><strong>Memoriza las posiciones:</strong> 12=en punto, 3=y cuarto, 6=y media, 9=menos cuarto</li>
+        <li><strong>Para "menos cuarto":</strong> Recuerda usar la hora siguiente (ej: 4:45 = "las cinco menos cuarto")</li>
+        <li><strong>Tómate tu tiempo:</strong> No hay prisa, la precisión es más importante que la velocidad</li>
+        <li><strong>Practica con relojes reales:</strong> Aplica lo aprendido con relojes de pared o de muñeca</li>
+    </ul>
+</div>
+
+<div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%); border-radius: 10px; text-align: center;">
+    <p style="color: #744210; margin: 0; font-style: italic;">
+        💭 "El tiempo es el recurso más valioso. Aprender a leerlo es aprender a valorarlo." - ¡Sigue practicando!
+    </p>
+</div>
+{% endblock %}
