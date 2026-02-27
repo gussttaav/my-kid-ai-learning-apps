@@ -1,0 +1,280 @@
+/* Hero Section */
+.hero-section {
+    text-align: center;
+    color: white;
+    margin-bottom: 50px;
+}
+
+.hero-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.hero-description {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* Apps Grid */
+.apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+}
+
+.app-card {
+    background: var(--bg-white);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease;
+}
+
+.app-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    padding: 30px 20px;
+    text-align: center;
+    color: white;
+}
+
+.card-header.multiplicar {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+}
+
+.card-header.suma-resta {
+    background: linear-gradient(135deg, #4ecdc4 0%, #26a69a 100%);
+}
+
+.card-header.reloj {
+    background: linear-gradient(135deg, #45b7d1 0%, #2196f3 100%);
+}
+
+.emoji-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.card-header h3 {
+    font-size: 1.5rem;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-features {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.feature {
+    background: var(--bg-light);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.card-actions {
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid var(--border-light);
+}
+
+/* Botones */
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--secondary-gradient);
+    color: white;
+    box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+}
+
+.btn-success {
+    background: var(--success-gradient);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--danger-gradient);
+    color: white;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+    color: white;
+}
+
+/* Info Section */
+.info-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    color: white;
+    margin-top: 40px;
+}
+
+.info-section h3 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.info-item {
+    text-align: center;
+}
+
+.info-number {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background: white;
+    color: var(--text-primary);
+    border-radius: 50%;
+    font-weight: bold;
+    line-height: 40px;
+    margin-bottom: 10px;
+}
+
+.info-note {
+    text-align: center;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Componentes de práctica */
+.practica-container {
+    background: var(--bg-white);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: var(--shadow-md);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.progreso-bar {
+    background: var(--border-light);
+    border-radius: 25px;
+    height: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.progreso-fill {
+    background: var(--secondary-gradient);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.timer {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+    transition: all 0.3s ease;
+}
+
+.timer.warning {
+    color: #dd6b20;
+}
+
+.timer.danger {
+    color: #e53e3e;
+    font-size: 2.2rem;
+}
+
+.feedback {
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.feedback.correcto {
+    background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+    color: #276749;
+}
+
+.feedback.incorrecto {
+    background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+    color: #742a2a;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.stat-card {
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.stat-card.correctas {
+    background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+}
+
+.stat-card.incorrectas {
+    background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    margin-top: 5px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .apps-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .hero-section h2 {
+        font-size: 2rem;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .practica-container {
+        padding: 20px;
+    }
+}

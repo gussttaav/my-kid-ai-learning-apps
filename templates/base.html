@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Aplicaciones Educativas{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <div class="container">
+                <h1 class="main-title">
+                    <a href="/">🎓 Aplicaciones Educativas para mi Niño</a>
+                </h1>
+                <nav class="main-nav">
+                    <a href="/" class="nav-link">Inicio</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="container">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <footer class="main-footer">
+            <div class="container">
+                <p>Creado con ❤️ para ayudar a aprender</p>
+                <p class="footer-note">Sin anuncios, sin registro, solo aprendizaje</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/practica-base.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if tabla_actual == 'mixta' %}
+    Práctica Mixta - Tablas de Multiplicar
+  {% elif tabla_actual %}
+    Tabla del {{ tabla_actual }} - Tablas de Multiplicar
+  {% else %}
+    Tablas de Multiplicar
+  {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tabla-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin: 30px 0;
+    }
+    
+    .tabla-btn {
+        padding: 15px 25px;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        color: white;
+        font-weight: bold;
+        transition: transform 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .tabla-btn:hover {
+        transform: translateY(-3px);
+    }
+    
+    .pregunta-display {
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        margin: 30px 0;
+        color: var(--text-primary);
+    }
+    
+    .respuesta-input {
+        width: 150px;
+        height: 60px;
+        font-size: 2rem;
+        text-align: center;
+        border: 2px solid var(--border-light);
+        border-radius: 10px;
+        margin: 20px auto;
+        display: block;
+    }
+    
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+    }
+    input[type=number] { 
+        -moz-appearance: textfield; 
+        appearance: textfield;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Pasamos la variable de Flask a JavaScript de forma segura -->
+<script>
+    // Variable global para la tabla seleccionada (disponible para todo el script)
+    var tablaSeleccionada = {{ tabla_actual|tojson if tabla_actual else 'null' }};
+</script>
+
+<!-- Selector de tablas -->
+<div id="selector-tablas" class="practica-container" {% if tabla_actual %}style="display: none;"{% endif %}>
+    <h2 style="text-align: center; margin-bottom: 20px;">🧮 Elige una tabla</h2>
+    
+    <div class="tabla-selector">
+        <a href="/tablas/practica/mixta" class="tabla-btn" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);">
+            🌟 Mixta
+        </a>
+        {% for i in range(2, 10) %}
+        <a href="/tablas/practica/{{ i }}" class="tabla-btn" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+            Tabla del {{ i }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Pantalla de inicio de práctica -->
+<div id="inicio" class="practica-container" {% if not tabla_actual %}style="display: none;"{% endif %}>
+    {% if tabla_actual == 'mixta' %}
+        <h2>🌟 Práctica Mixta</h2>
+        <p>Vas a practicar con <strong>20 preguntas</strong> de las tablas <strong>2 al 9</strong></p>
+        <p class="info-note">Tienes <strong>10 segundos</strong> por pregunta</p>
+    {% elif tabla_actual %}
+        <h2>📚 Tabla del {{ tabla_actual }}</h2>
+        <p>Vas a practicar con <strong>20 preguntas</strong></p>
+        <p class="info-note">Tienes <strong>10 segundos</strong> por pregunta</p>
+    {% endif %}
+    
+    <button class="btn btn-success" onclick="empezarPractica()" style="font-size: 1.3rem; padding: 20px 40px;">
+        🚀 ¡Comenzar Práctica!
+    </button>
+    <div style="margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="volverSelector()">
+            ← Elegir otra tabla
+        </button>
+    </div>
+</div>
+
+<!-- Pantalla de práctica -->
+<div id="practica" class="practica-container" style="display: none;">
+    <div class="progreso-bar">
+        <div class="progreso-fill" id="progreso-barra"></div>
+    </div>
+    
+    <h2>Pregunta <span id="numero-pregunta">1</span> de 20</h2>
+    
+    {% if tabla_actual == 'mixta' %}
+        <p style="text-align: center; color: #718096; margin-bottom: 10px;">Práctica Mixta (Tablas 2-9)</p>
+    {% elif tabla_actual %}
+        <p style="text-align: center; color: #718096; margin-bottom: 10px;">Tabla del {{ tabla_actual }}</p>
+    {% endif %}
+    
+    <div class="pregunta-display" id="pregunta-texto">Cargando...</div>
+    
+    <div class="timer" id="timer">⏰ 10</div>
+    
+    <input type="number" id="respuesta-input" class="respuesta-input" placeholder="?" min="0" max="999" autocomplete="off">
+    
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="siguientePregunta()">Siguiente →</button>
+        <button class="btn btn-danger" onclick="reiniciarPractica()">Reiniciar</button>
+    </div>
+    
+    <div id="feedback" class="feedback" style="display: none;"></div>
+</div>
+
+<!-- Pantalla de resultados -->
+<div id="resultados" class="practica-container" style="display: none;">
+    <h2>🎉 ¡Práctica Completada!</h2>
+    
+    <div class="stats-container">
+        <div class="stat-card correctas">
+            <div class="stat-number" id="correctas-final">0</div>
+            <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card incorrectas">
+            <div class="stat-number" id="incorrectas-final">0</div>
+            <div class="stat-label">Incorrectas</div>
+        </div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); margin: 20px 0;">
+        <div class="stat-number" id="porcentaje-final">0%</div>
+        <div class="stat-label">Acierto</div>
+    </div>
+    
+    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-success" onclick="window.location.href='/'">🏠 Inicio</button>
+        <button class="btn btn-secondary" onclick="volverSelector()">↩️ Elegir otra</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/practica-base.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tablas.js') }}"></script>
+<script>
+// Función para volver al selector
+function volverSelector() {
+    document.getElementById('selector-tablas').style.display = 'block';
+    document.getElementById('inicio').style.display = 'none';
+    document.getElementById('practica').style.display = 'none';
+    document.getElementById('resultados').style.display = 'none';
+    
+    if (window.practicaActual) {
+        if (window.practicaActual.timer) {
+            clearInterval(window.practicaActual.timer);
+        }
+        window.practicaActual.limpiarEstado();
+        window.practicaActual = null;
+    }
+}
+
+// Función para empezar la práctica
+function empezarPractica() {
+    if (!tablaSeleccionada) {
+        console.error('No hay tabla seleccionada');
+        return;
+    }
+    
+    window.practicaActual = new PracticaTablas(tablaSeleccionada);
+    window.practicaActual.empezarPractica();
+}
+
+// Función para siguiente pregunta
+function siguientePregunta() {
+    if (window.practicaActual) {
+        window.practicaActual.siguientePregunta();
+    }
+}
+
+// Función para reiniciar práctica
+function reiniciarPractica() {
+    if (window.practicaActual && confirm('¿Reiniciar la práctica? Se perderá el progreso actual.')) {
+        window.practicaActual.reiniciarPractica();
+    }
+}
+
+// Manejar tecla Enter en el input
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('respuesta-input');
+    if (input) {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                siguientePregunta();
+            }
+        });
+    }
+    
+    // Si hay una tabla seleccionada y hay estado guardado, mostrar mensaje
+    if (tablaSeleccionada) {
+        const estadoGuardado = sessionStorage.getItem(`tablas_${tablaSeleccionada}`);
+        if (estadoGuardado) {
+            const mensaje = document.createElement('div');
+            mensaje.textContent = "Tienes una práctica en curso. ¿Quieres continuar?";
+            mensaje.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #4299e1;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                cursor: pointer;
+            `;
+            mensaje.onclick = function() {
+                document.body.removeChild(mensaje);
+                empezarPractica();
+            };
+            document.body.appendChild(mensaje);
+            
+            setTimeout(() => {
+                if (document.body.contains(mensaje)) {
+                    document.body.removeChild(mensaje);
+                }
+            }, 5000);
+        }
+    }
+});
+</script>
+{% endblock %}

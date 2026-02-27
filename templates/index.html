@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Aplicaciones Educativas{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <h2>📚 Elige una actividad para practicar</h2>
+    <p class="hero-description">
+        Aplicaciones interactivas creadas para hacer el aprendizaje divertido y efectivo
+    </p>
+</div>
+
+<div class="apps-grid">
+    <!-- Tablas de Multiplicar -->
+    <div class="app-card">
+        <div class="card-header multiplicar">
+            <span class="emoji-icon">🧮</span>
+            <h3>Tablas de Multiplicar</h3>
+        </div>
+        <div class="card-body">
+            <p>Practica las tablas del 2 al 9 o elige el desafío mixto</p>
+            <div class="card-features">
+                <span class="feature">⏱️ 10 seg/pregunta</span>
+                <span class="feature">🎯 20 preguntas</span>
+            </div>
+        </div>
+        <div class="card-actions">
+            <a href="/tablas" class="btn btn-primary">Comenzar</a>
+        </div>
+    </div>
+
+    <!-- Sumas y Restas con Llevadas -->
+    <div class="app-card">
+        <div class="card-header suma-resta">
+            <span class="emoji-icon">➕➖</span>
+            <h3>Sumas y Restas con Llevadas</h3>
+        </div>
+        <div class="card-body">
+            <p>Dominarás las llevadas y préstamos paso a paso</p>
+            <div class="card-features">
+                <span class="feature">⏱️ 25 seg/pregunta</span>
+                <span class="feature">🎯 20 preguntas</span>
+            </div>
+        </div>
+        <div class="card-actions">
+            <a href="/suma-resta" class="btn btn-primary">Comenzar</a>
+        </div>
+    </div>
+
+    <!-- Lectura de Reloj -->
+    <div class="app-card">
+        <div class="card-header reloj">
+            <span class="emoji-icon">🕐</span>
+            <h3>Lectura de Reloj Analógico</h3>
+        </div>
+        <div class="card-body">
+            <p>Aprende a leer la hora en relojes de manecillas</p>
+            <div class="card-features">
+                <span class="feature">⏱️ 30 seg/pregunta</span>
+                <span class="feature">🎯 20 preguntas</span>
+            </div>
+        </div>
+        <div class="card-actions">
+            <a href="/reloj" class="btn btn-primary">Comenzar</a>
+        </div>
+    </div>
+</div>
+
+<div class="info-section">
+    <h3>💡 ¿Cómo funciona?</h3>
+    <div class="info-grid">
+        <div class="info-item">
+            <span class="info-number">1</span>
+            <p>Elige la actividad que quieras practicar</p>
+        </div>
+        <div class="info-item">
+            <span class="info-number">2</span>
+            <p>Responde las preguntas con calma</p>
+        </div>
+        <div class="info-item">
+            <span class="info-number">3</span>
+            <p>Revisa tus resultados al finalizar</p>
+        </div>
+        <div class="info-item">
+            <span class="info-number">4</span>
+            <p>¡Vuelve a intentarlo para mejorar!</p>
+        </div>
+    </div>
+    <p class="info-note">Tus resultados se guardan durante la sesión actual</p>
+</div>
+{% endblock %}
