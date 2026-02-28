@@ -6,12 +6,12 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-for-vercel')
 
 # Importar y registrar blueprints de las aplicaciones
 from apps.tablas_multiplicar.routes import tablas_bp
-# from apps.suma_resta_llevadas.routes import suma_resta_bp
-# from apps.reloj_analogico.routes import reloj_bp
+from apps.suma_resta_llevadas.routes import suma_resta_bp
+from apps.reloj_analogico.routes import reloj_bp
 
 app.register_blueprint(tablas_bp, url_prefix='/tablas')
-# app.register_blueprint(suma_resta_bp, url_prefix='/suma-resta')
-# app.register_blueprint(reloj_bp, url_prefix='/reloj')
+app.register_blueprint(suma_resta_bp, url_prefix='/suma-resta')
+app.register_blueprint(reloj_bp, url_prefix='/reloj')
 
 @app.route('/')
 def index():

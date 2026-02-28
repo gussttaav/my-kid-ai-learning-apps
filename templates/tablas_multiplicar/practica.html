@@ -95,12 +95,20 @@
 <div id="inicio" class="practica-container" {% if not tabla_actual %}style="display: none;"{% endif %}>
     {% if tabla_actual == 'mixta' %}
         <h2>🌟 Práctica Mixta</h2>
-        <p>Vas a practicar con <strong>20 preguntas</strong> de las tablas <strong>2 al 9</strong></p>
-        <p class="info-note">Tienes <strong>10 segundos</strong> por pregunta</p>
+        <p style="font-size: 1.3em; color: #4a5568; margin: 20px 0;">
+            Vas a practicar con <strong>20 preguntas</strong> de las tablas <strong>2 al 9</strong>
+        </p>
+        <p style="color: #718096; margin-bottom: 30px;">
+            Solo multiplicaciones del <strong>2×2 al 9×9</strong> • Tienes <strong>10 segundos</strong> por pregunta
+        </p>
     {% elif tabla_actual %}
         <h2>📚 Tabla del {{ tabla_actual }}</h2>
-        <p>Vas a practicar con <strong>20 preguntas</strong></p>
-        <p class="info-note">Tienes <strong>10 segundos</strong> por pregunta</p>
+        <p style="font-size: 1.3em; color: #4a5568; margin: 20px 0;">
+            Vas a practicar con <strong>20 preguntas</strong>
+        </p>
+        <p style="color: #718096; margin-bottom: 30px;">
+            Tienes <strong>10 segundos</strong> para responder cada pregunta
+        </p>
     {% endif %}
     
     <button class="btn btn-success" onclick="empezarPractica()" style="font-size: 1.3rem; padding: 20px 40px;">

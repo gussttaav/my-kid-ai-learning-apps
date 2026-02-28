@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if operacion == 'suma' %}
+    Sumas con llevadas
+  {% elif operacion == 'resta' %}
+    Restas con préstamos
+  {% else %}
+    Sumas y Restas con llevadas
+  {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .operacion-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin: 30px 0;
+    }
+    
+    .operacion-card {
+        flex: 1;
+        min-width: 250px;
+        padding: 30px;
+        border-radius: 20px;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .operacion-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .operacion-card.suma {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    }
+    
+    .operacion-card.resta {
+        background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    }
+    
+    .operacion-emoji {
+        font-size: 4rem;
+        margin-bottom: 15px;
+    }
+    
+    .operacion-titulo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .operacion-ejemplo {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    /* Estilos para la operación matemática */
+    .operacion-matematica {
+        background: #f8f9fa;
+        padding: 30px;
+        border-radius: 15px;
+        display: inline-block;
+        margin: 20px auto;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .operacion-fila {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 2.5rem;
+        margin: 5px 0;
+    }
+    
+    .numero-display {
+        min-width: 60px;
+        text-align: right;
+        color: #2d3748;
+    }
+    
+    .signo-display {
+        min-width: 40px;
+        text-align: center;
+        color: #4299e1;
+    }
+    
+    .linea-division {
+        width: 100%;
+        height: 3px;
+        background: #4a5568;
+        margin: 10px auto;
+    }
+    
+    .inputs-container {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    .input-digito-sr {
+        width: 60px;
+        height: 70px;
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        border: 3px solid #e2e8f0;
+        border-radius: 10px;
+        background: white;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .input-digito-sr:focus {
+        outline: none;
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+    
+    .info-box {
+        background: #ebf8ff;
+        border-left: 4px solid #4299e1;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 8px;
+        text-align: left;
+    }
+    
+    .info-box h4 {
+        color: #2c5282;
+        margin-bottom: 10px;
+    }
+    
+    .info-box ul {
+        color: #2d3748;
+        padding-left: 20px;
+    }
+    
+    .info-box li {
+        margin: 5px 0;
+    }
+    
+    @media (max-width: 600px) {
+        .operacion-fila {
+            font-size: 2rem;
+        }
+        
+        .input-digito-sr {
+            width: 50px;
+            height: 60px;
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Pasamos la variable de Flask a JavaScript -->
+<script>
+    var operacionSeleccionada = {{ operacion|tojson if operacion else 'null' }};
+</script>
+
+<!-- Selector de operación -->
+<div id="selector-operacion" class="practica-container" {% if operacion %}style="display: none;"{% endif %}>
+    <h2 style="text-align: center; margin-bottom: 30px;">🧮 ¿Qué quieres practicar?</h2>
+    
+    <div class="operacion-selector">
+        <a href="/suma-resta/practica/suma" class="operacion-card suma">
+            <div class="operacion-emoji">➕</div>
+            <div class="operacion-titulo">Sumas con llevadas</div>
+            <div class="operacion-ejemplo">Ej: 47 + 36 = 83</div>
+        </a>
+        
+        <a href="/suma-resta/practica/resta" class="operacion-card resta">
+            <div class="operacion-emoji">➖</div>
+            <div class="operacion-titulo">Restas con préstamos</div>
+            <div class="operacion-ejemplo">Ej: 62 - 28 = 34</div>
+        </a>
+    </div>
+    
+    <div class="info-box" style="margin-top: 30px;">
+        <h4>📝 ¿Cómo funcionan las llevadas y préstamos?</h4>
+        <ul>
+            <li><strong>Sumas con llevadas:</strong> Cuando al sumar unidades (7+6=13), escribimos 3 y llevamos 1 a las decenas</li>
+            <li><strong>Restas con préstamos:</strong> Cuando al restar unidades (2-8), pedimos prestada una decena (12-8=4)</li>
+            <li><strong>Consejo:</strong> Escribe siempre de derecha a izquierda (unidades → decenas)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Pantalla de inicio de práctica -->
+<div id="inicio" class="practica-container" {% if not operacion %}style="display: none;"{% endif %}>
+    {% if operacion == 'suma' %}
+        <h2>➕ Sumas con llevadas</h2>
+        <p>Vas a practicar <strong>20 sumas</strong> que requieren llevadas</p>
+    {% elif operacion == 'resta' %}
+        <h2>➖ Restas con préstamos</h2>
+        <p>Vas a practicar <strong>20 restas</strong> que requieren préstamos</p>
+    {% endif %}
+    
+    <p class="info-note">Tienes <strong>25 segundos</strong> para cada operación</p>
+    
+    <button class="btn btn-success" onclick="empezarPractica()" style="font-size: 1.3rem; padding: 20px 40px;">
+        🚀 ¡Comenzar Práctica!
+    </button>
+    
+    <div style="margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="volverSelector()">
+            ← Elegir otra operación
+        </button>
+    </div>
+</div>
+
+<!-- Pantalla de práctica -->
+<div id="practica" class="practica-container" style="display: none;">
+    <div class="progreso-bar">
+        <div class="progreso-fill" id="progreso-barra"></div>
+    </div>
+    
+    <h2>Pregunta <span id="numero-pregunta">1</span> de 20</h2>
+    
+    {% if operacion == 'suma' %}
+        <p style="text-align: center; color: #38a169; margin-bottom: 10px;">✨ Suma con llevadas</p>
+    {% elif operacion == 'resta' %}
+        <p style="text-align: center; color: #e53e3e; margin-bottom: 10px;">✨ Resta con préstamos</p>
+    {% endif %}
+    
+    <div class="operacion-matematica" id="operacion-display">
+        <!-- Se llena dinámicamente con JavaScript -->
+    </div>
+    
+    <div class="timer" id="timer">⏰ 25</div>
+    
+    <div class="inputs-container" id="inputs-container">
+        <!-- Se llena dinámicamente -->
+    </div>
+    
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="verificarRespuesta()">Verificar</button>
+        <button class="btn btn-danger" onclick="reiniciarPractica()">Reiniciar</button>
+    </div>
+    
+    <div id="feedback" class="feedback" style="display: none;"></div>
+</div>
+
+<!-- Pantalla de resultados -->
+<div id="resultados" class="practica-container" style="display: none;">
+    <h2>🎉 ¡Práctica Completada!</h2>
+    
+    <div class="stats-container">
+        <div class="stat-card correctas">
+            <div class="stat-number" id="correctas-final">0</div>
+            <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card incorrectas">
+            <div class="stat-number" id="incorrectas-final">0</div>
+            <div class="stat-label">Incorrectas</div>
+        </div>
+    </div>
+    
+    <div class="stat-card" style="background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); margin: 20px 0;">
+        <div class="stat-number" id="porcentaje-final">0%</div>
+        <div class="stat-label">Acierto</div>
+    </div>
+    
+    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-success" onclick="window.location.href='/'">🏠 Inicio</button>
+        <button class="btn btn-secondary" onclick="volverSelector()">↩️ Elegir otra</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/practica-base.js') }}"></script>
+<script src="{{ url_for('static', filename='js/suma-resta.js') }}"></script>
+<script>
+// Función para volver al selector
+function volverSelector() {
+    document.getElementById('selector-operacion').style.display = 'block';
+    document.getElementById('inicio').style.display = 'none';
+    document.getElementById('practica').style.display = 'none';
+    document.getElementById('resultados').style.display = 'none';
+    
+    if (window.practicaActual) {
+        if (window.practicaActual.timer) {
+            clearInterval(window.practicaActual.timer);
+        }
+        window.practicaActual.limpiarEstado();
+        window.practicaActual = null;
+    }
+}
+
+// Función para empezar la práctica
+function empezarPractica() {
+    if (!operacionSeleccionada) {
+        console.error('No hay operación seleccionada');
+        return;
+    }
+    
+    window.practicaActual = new PracticaSumaResta(operacionSeleccionada);
+    window.practicaActual.empezarPractica();
+}
+
+// Función para verificar respuesta
+function verificarRespuesta() {
+    if (window.practicaActual) {
+        window.practicaActual.verificarRespuesta();
+    }
+}
+
+// Función para reiniciar práctica
+function reiniciarPractica() {
+    if (window.practicaActual && confirm('¿Reiniciar la práctica? Se perderá el progreso actual.')) {
+        window.practicaActual.reiniciarPractica();
+    }
+}
+
+// Verificar estado guardado al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    if (operacionSeleccionada) {
+        const estadoGuardado = sessionStorage.getItem(`sumaResta_${operacionSeleccionada}`);
+        if (estadoGuardado) {
+            const mensaje = document.createElement('div');
+            mensaje.textContent = "Tienes una práctica en curso. ¿Quieres continuar?";
+            mensaje.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #4299e1;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                cursor: pointer;
+            `;
+            mensaje.onclick = function() {
+                document.body.removeChild(mensaje);
+                empezarPractica();
+            };
+            document.body.appendChild(mensaje);
+            
+            setTimeout(() => {
+                if (document.body.contains(mensaje)) {
+                    document.body.removeChild(mensaje);
+                }
+            }, 5000);
+        }
+    }
+});
+</script>
+{% endblock %}
