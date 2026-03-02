@@ -12,6 +12,14 @@
 
 {% block extra_css %}
 <style>
+    h1 {
+        color: #5a67d8;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+        
     .operacion-selector {
         display: flex;
         flex-wrap: wrap;
@@ -61,66 +69,79 @@
     }
     
     /* Estilos para la operación matemática */
-    .operacion-matematica {
+    .operacion-container {
+        display: inline-block;
+        font-family: 'Courier New', monospace;
         background: #f8f9fa;
         padding: 30px;
         border-radius: 15px;
-        display: inline-block;
-        margin: 20px auto;
-        font-family: 'Courier New', monospace;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin: 20px 0;
     }
-    
-    .operacion-fila {
-        display: flex;
+
+    .operacion-display {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        gap: 10px;
         align-items: center;
         justify-content: center;
-        gap: 10px;
-        font-size: 2.5rem;
-        margin: 5px 0;
+        font-size: 2em;
+        font-weight: bold;
+        margin-bottom: 15px;
     }
-    
-    .numero-display {
-        min-width: 60px;
+
+    .numero {
         text-align: right;
+        min-width: 60px;
         color: #2d3748;
     }
-    
-    .signo-display {
-        min-width: 40px;
+
+    .signo-operacion {
         text-align: center;
         color: #4299e1;
+        font-size: 1.2em;
     }
-    
+
     .linea-division {
-        width: 100%;
-        height: 3px;
+        grid-column: 1 / -1;
+        height: 2px;
         background: #4a5568;
-        margin: 10px auto;
+        margin: 5px 0;
     }
-    
-    .inputs-container {
-        display: flex;
+
+    .inputs-respuesta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
         gap: 8px;
         justify-content: center;
-        margin-top: 20px;
+        max-width: 200px;
+        margin: 0 auto;
     }
-    
-    .input-digito-sr {
-        width: 60px;
-        height: 70px;
-        font-size: 2rem;
+
+    .input-digito {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5em;
         font-weight: bold;
         text-align: center;
-        border: 3px solid #e2e8f0;
-        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
         background: white;
         font-family: 'Courier New', monospace;
+        transition: border-color 0.3s ease;
     }
-    
-    .input-digito-sr:focus {
+
+    .input-digito:focus {
         outline: none;
         border-color: #4299e1;
         box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+    
+    /* make practica a flex column container for centering when shown */
+    #practica {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     
     .info-box {
@@ -168,7 +189,10 @@
 
 <!-- Selector de operación -->
 <div id="selector-operacion" class="practica-container" {% if operacion %}style="display: none;"{% endif %}>
-    <h2 style="text-align: center; margin-bottom: 30px;">🧮 ¿Qué quieres practicar?</h2>
+    <h1>🧮 Practica las sumas y restas con llevadas</h1>
+    <p style="font-size: 1.2em; color: #4a5568; margin-bottom: 30px; text-align: center;">
+        Selecciona el tipo de operación para empezar a practicar
+    </p>
     
     <div class="operacion-selector">
         <a href="/suma-resta/practica/suma" class="operacion-card suma">
@@ -184,33 +208,56 @@
         </a>
     </div>
     
-    <div class="info-box" style="margin-top: 30px;">
-        <h4>📝 ¿Cómo funcionan las llevadas y préstamos?</h4>
-        <ul>
-            <li><strong>Sumas con llevadas:</strong> Cuando al sumar unidades (7+6=13), escribimos 3 y llevamos 1 a las decenas</li>
-            <li><strong>Restas con préstamos:</strong> Cuando al restar unidades (2-8), pedimos prestada una decena (12-8=4)</li>
-            <li><strong>Consejo:</strong> Escribe siempre de derecha a izquierda (unidades → decenas)</li>
+    <div style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%); border-radius: 15px; display: flex; flex-direction: column; align-items: center;">
+        <h3 style="color: #4a5568; margin-bottom: 15px;">ℹ️ Instrucciones</h3>
+        <ul style="text-align: left; color: #4a5568; line-height: 1.6;">
+            <li>Selecciona el tipo de operación (suma o resta)</li>
+            <li>Responde 20 preguntas en total</li>
+            <li>Tienes 25 segundos para cada pregunta</li>
+            <li>Escribe cada dígito en su casilla correspondiente</li>
+            <li>Todas las operaciones incluyen llevadas o préstamos</li>
+            <li>Al final verás tus resultados y se guardarán automáticamente</li>
         </ul>
+    </div>
+
+    <div style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); border-radius: 15px; display: flex; flex-direction: column; align-items: center;">
+        <h4 style="color: #234e52; margin-bottom: 15px;">💡 Ejemplo de cómo funciona:</h4>
+        <div class="operacion-container" style="background: white; transform: scale(0.8);">
+            <div class="operacion-display">
+                <div></div>
+                <div class="numero">47</div>
+                <div></div>
+                
+                <div class="signo-operacion">+</div>
+                <div class="numero">36</div>
+                <div></div>
+            </div>
+            <div class="linea-division"></div>
+            <div class="inputs-respuesta" style="grid-template-columns: repeat(2, 50px);">
+                <input type="text" class="input-digito" value="8" readonly style="background: #e6fffa;">
+                <input type="text" class="input-digito" value="3" readonly style="background: #e6fffa;">
+            </div>
+        </div>
+        <p style="color: #2c7a7b; font-size: 0.9em;">
+            Completa cada casilla con el dígito correspondiente del resultado
+        </p>
     </div>
 </div>
 
 <!-- Pantalla de inicio de práctica -->
-<div id="inicio" class="practica-container" {% if not operacion %}style="display: none;"{% endif %}>
-    {% if operacion == 'suma' %}
-        <h2>➕ Sumas con llevadas</h2>
-        <p>Vas a practicar <strong>20 sumas</strong> que requieren llevadas</p>
-    {% elif operacion == 'resta' %}
-        <h2>➖ Restas con préstamos</h2>
-        <p>Vas a practicar <strong>20 restas</strong> que requieren préstamos</p>
-    {% endif %}
-    
-    <p class="info-note">Tienes <strong>25 segundos</strong> para cada operación</p>
-    
-    <button class="btn btn-success" onclick="empezarPractica()" style="font-size: 1.3rem; padding: 20px 40px;">
+<div id="inicio" class="practica-container" {% if not operacion %}style="display: none;"{% endif %} style="display: flex; flex-direction: column; align-items: center;">
+
+    <h1>{% if operacion == 'suma' %}➕ Sumas con llevadas{% else %}➖ Restas con préstamos{% endif %}</h1>
+    <p style="font-size: 1.3em; color: #4a5568; margin-bottom: 20px;">
+        Vas a practicar con <strong>20 preguntas</strong>
+    </p>
+    <p style="color: #718096; margin-bottom: 30px;">
+        Tienes <strong id="tiempo-instruccion">25</strong> segundos para responder cada pregunta
+    </p>
+    <button class="btn btn-success" onclick="empezarPractica()" style="font-size: 1.3em; padding: 20px 40px;">
         🚀 ¡Comenzar Práctica!
     </button>
-    
-    <div style="margin-top: 20px;">
+    <div style="margin-top: 30px;">
         <button class="btn btn-secondary" onclick="volverSelector()">
             ← Elegir otra operación
         </button>
@@ -223,23 +270,25 @@
         <div class="progreso-fill" id="progreso-barra"></div>
     </div>
     
-    <h2>Pregunta <span id="numero-pregunta">1</span> de 20</h2>
+    <h2 style="color: #4a5568;">Pregunta <span id="numero-pregunta">1</span> de 20</h2>
     
     {% if operacion == 'suma' %}
         <p style="text-align: center; color: #38a169; margin-bottom: 10px;">✨ Suma con llevadas</p>
     {% elif operacion == 'resta' %}
         <p style="text-align: center; color: #e53e3e; margin-bottom: 10px;">✨ Resta con préstamos</p>
     {% endif %}
-    
-    <div class="operacion-matematica" id="operacion-display">
-        <!-- Se llena dinámicamente con JavaScript -->
+
+    <div class="operacion-container">
+        <div class="operacion-display" id="operacion-display">
+            <!-- Se llena dinámicamente -->
+        </div>
+        <div class="linea-division"></div>
+        <div class="inputs-respuesta" id="inputs-container">
+            <!-- Se llena dinámicamente -->
+        </div>
     </div>
     
     <div class="timer" id="timer">⏰ 25</div>
-    
-    <div class="inputs-container" id="inputs-container">
-        <!-- Se llena dinámicamente -->
-    </div>
     
     <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
         <button class="btn btn-primary" onclick="verificarRespuesta()">Verificar</button>
@@ -251,7 +300,12 @@
 
 <!-- Pantalla de resultados -->
 <div id="resultados" class="practica-container" style="display: none;">
-    <h2>🎉 ¡Práctica Completada!</h2>
+    <h1>🎉 ¡Práctica Completada!</h1>
+    {% if operacion == 'suma' %}
+        <h2 style="color: #4a5568; text-align: center;">Suma con llevadas</h2>
+    {% elif operacion == 'resta' %}
+        <h2 style="color: #4a5568; text-align: center;">Resta con préstamos</h2>
+    {% endif %}
     
     <div class="stats-container">
         <div class="stat-card correctas">

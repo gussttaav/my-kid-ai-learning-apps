@@ -1,3 +1,15 @@
-# Entornos virtuales de Python
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments (very common)
+.venv/
 venv/
-.env/
+env/

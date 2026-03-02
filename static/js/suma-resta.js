@@ -44,7 +44,7 @@ class PracticaSumaResta extends PracticaBase {
         
         if (selector) selector.style.display = 'none';
         if (inicio) inicio.style.display = 'none';
-        if (practica) practica.style.display = 'block';
+        if (practica) practica.style.display = 'flex';
         
         if (this.preguntaActual === 0) {
             this.actualizarProgreso();
@@ -94,15 +94,13 @@ class PracticaSumaResta extends PracticaBase {
         const signo = data.operacion === '+' ? '+' : '−';
         
         display.innerHTML = `
-            <div class="operacion-fila">
-                <div class="signo-display"></div>
-                <div class="numero-display">${data.num1}</div>
-            </div>
-            <div class="operacion-fila">
-                <div class="signo-display">${signo}</div>
-                <div class="numero-display">${data.num2}</div>
-            </div>
-            <div class="linea-division"></div>
+            <div></div>
+            <div class="numero">${data.num1}</div>
+            <div></div>
+            
+            <div class="signo-operacion">${signo}</div>
+            <div class="numero">${data.num2}</div>
+            <div></div>
         `;
     }
     
@@ -111,12 +109,12 @@ class PracticaSumaResta extends PracticaBase {
         if (!container) return;
         
         container.innerHTML = '';
-        container.style.gridTemplateColumns = `repeat(${this.digitosResultado}, 60px)`;
+        container.style.gridTemplateColumns = `repeat(${this.digitosResultado}, 50px)`;
         
         for (let i = 0; i < this.digitosResultado; i++) {
             const input = document.createElement('input');
             input.type = 'text';
-            input.className = 'input-digito-sr';
+            input.className = 'input-digito';
             input.maxLength = 1;
             input.setAttribute('data-position', i);
             input.setAttribute('inputmode', 'numeric');
@@ -169,7 +167,7 @@ class PracticaSumaResta extends PracticaBase {
     }
     
     obtenerRespuestaUsuario() {
-        const inputs = document.querySelectorAll('.input-digito-sr');
+        const inputs = document.querySelectorAll('#inputs-container .input-digito');
         let respuesta = '';
         let hayVacios = false;
         
@@ -243,7 +241,7 @@ class PracticaSumaResta extends PracticaBase {
         
         if (practica) practica.style.display = 'none';
         if (resultados) resultados.style.display = 'none';
-        if (inicio) inicio.style.display = 'block';
+        if (inicio) inicio.style.display = 'block'; // inicio already has its own flex styles
         
         this.mostrarMensaje('Práctica reiniciada', '#f56565');
     }

@@ -187,6 +187,7 @@
     height: 10px;
     margin: 20px 0;
     overflow: hidden;
+    width: 100%; /* full width inside flex container */
 }
 
 .progreso-fill {
