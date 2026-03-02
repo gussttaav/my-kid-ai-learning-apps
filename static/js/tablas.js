@@ -174,7 +174,7 @@ class PracticaTablas extends PracticaBase {
         
         if (practica) practica.style.display = 'none';
         if (resultados) resultados.style.display = 'none';
-        if (inicio) inicio.style.display = 'block';
+        if (inicio) inicio.style.display = 'flex';
         
         this.mostrarMensaje('Práctica reiniciada', '#f56565');
     }
